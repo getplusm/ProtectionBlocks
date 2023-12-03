@@ -1,0 +1,4 @@
+name: plazmer-protectionstones
+version: '${version}'
+main: plazmer.plazmerprotectionstones.Plazmer_protectionstones
+api-version: '1.20'
