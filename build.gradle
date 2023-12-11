@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'plazmer'
-version = '1.0'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -19,16 +19,24 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+    // Holographic Displays
+    maven {
+        url = 'https://repo.codemc.io/repository/maven-public/'
+    }
+    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
     compileOnly "io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT"
+    // holo
+    compileOnly 'me.filoghost.holographicdisplays:holographicdisplays-api:3.0.0'
+    compileOnly 'com.github.decentsoftware-eu:decentholograms:2.8.3'
     // LP
     compileOnly 'net.luckperms:api:5.4'
     // PAPI
     compileOnly 'me.clip:placeholderapi:2.10.10'
     // Engine
-    compileOnly files('D:/eclipse work/plazmer-engine/build/engine-2.4.1-all.jar')
+    compileOnly 'com.github.getplusm:Engine:2.4.3'
     compileOnly files('D:/eclipse work/plazmer-engine-coins/build/libs/CoinsEngine-1.0.0.jar')
 }
 

@@ -1,4 +1,4 @@
-package t.me.p1azmer.plugin.protectionstones.utils;
+package t.me.p1azmer.plugin.protectionblocks.utils;
 
 import org.bukkit.Location;
 import org.bukkit.World;

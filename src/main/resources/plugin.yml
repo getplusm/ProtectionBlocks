@@ -1,4 +1,8 @@
-name: plazmer-protectionstones
+name: ProtectionBlocks
 version: '${version}'
-main: plazmer.plazmerprotectionstones.Plazmer_protectionstones
+main: t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin
 api-version: '1.20'
+author: "plazmer"
+description: "Custom private region via blocks"
+depend: [PLAZMER-ENGINE]
+folia-supported: true
