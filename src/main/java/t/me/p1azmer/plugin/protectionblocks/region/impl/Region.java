@@ -17,6 +17,7 @@ import t.me.p1azmer.engine.utils.Colorizer;
 import t.me.p1azmer.engine.utils.NumberUtil;
 import t.me.p1azmer.engine.utils.TimeUtil;
 import t.me.p1azmer.plugin.protectionblocks.Keys;
+import t.me.p1azmer.plugin.protectionblocks.Perms;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
@@ -315,7 +316,11 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
     }
 
     public boolean isAllowed(@NotNull Player player) {
-        return this.isAllowed(player.getUniqueId());
+        if (this.isExpired()) {
+            this.manager.deleteRegion(this, true);
+            return true;
+        }
+        return this.isOwner(player.getUniqueId()) || this.isMember(player.getUniqueId()) || player.hasPermission(Perms.BYPASS_REGION_MANIPULATION);
     }
 
     public boolean isAllowed(@NotNull UUID uuid) {

@@ -93,8 +93,10 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
 
                 region.getRegionMenu().openNextTick(event.getPlayer(), 1);
             }
-        } else
+        } else {
+            plugin.getMessage(Lang.REGION_ERROR_INTERACT).send(event.getPlayer());
             event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -139,46 +141,6 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
                         .replace(region.replacePlaceholders())
                         .send(event.getPlayer())
         );
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onInventoryClickEvent(InventoryClickEvent event) {
-        if (event.getInventory().getLocation() == null) return;
-
-        if (event.getInventory().getType() != InventoryType.CRAFTING
-                || event.getInventory().getType() != InventoryType.CREATIVE
-                || event.getInventory().getType() != InventoryType.ENCHANTING
-                || event.getInventory().getType() != InventoryType.ENDER_CHEST
-                || event.getInventory().getType() != InventoryType.WORKBENCH
-                || event.getInventory().getType() != InventoryType.PLAYER
-        ) {
-            Region region = this.manager.getRegionByLocation(event.getInventory().getLocation());
-            if (region == null) return;
-
-            if (!region.isAllowed(event.getWhoClicked().getUniqueId())) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onInventoryOpenEvent(InventoryOpenEvent event) {
-        if (event.getInventory().getLocation() == null) return;
-
-        if (event.getInventory().getType() != InventoryType.CRAFTING
-                || event.getInventory().getType() != InventoryType.CREATIVE
-                || event.getInventory().getType() != InventoryType.ENCHANTING
-                || event.getInventory().getType() != InventoryType.ENDER_CHEST
-                || event.getInventory().getType() != InventoryType.WORKBENCH
-                || event.getInventory().getType() != InventoryType.PLAYER
-        ) {
-            Region region = this.manager.getRegionByLocation(event.getInventory().getLocation());
-            if (region == null) return;
-
-            if (!region.isAllowed(event.getPlayer().getUniqueId())) {
-                event.setCancelled(true);
-            }
-        }
     }
 
     @EventHandler(priority = EventPriority.LOW)

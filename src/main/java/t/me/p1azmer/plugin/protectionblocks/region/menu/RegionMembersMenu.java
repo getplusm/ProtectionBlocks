@@ -9,6 +9,8 @@ import t.me.p1azmer.engine.api.menu.MenuItemType;
 import t.me.p1azmer.engine.api.menu.click.ClickHandler;
 import t.me.p1azmer.engine.api.menu.click.ItemClick;
 import t.me.p1azmer.engine.api.menu.impl.ConfigMenu;
+import t.me.p1azmer.engine.api.menu.impl.MenuOptions;
+import t.me.p1azmer.engine.api.menu.impl.MenuViewer;
 import t.me.p1azmer.engine.editor.EditorManager;
 import t.me.p1azmer.engine.utils.Colorizer;
 import t.me.p1azmer.engine.utils.ItemReplacer;
@@ -79,6 +81,12 @@ public class RegionMembersMenu extends ConfigMenu<ProtectionPlugin> implements A
     }
 
     @Override
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+        super.onPrepare(viewer, options);
+        this.getItemsForPage(viewer).forEach(this::addItem);
+    }
+
+    @Override
     public @NotNull ItemStack getObjectStack(@NotNull Player player, @NotNull RegionMember member) {
         ItemStack item = ItemUtil.createCustomHead("player:" + member.getId());
         ItemReplacer.create(item)
@@ -95,10 +103,13 @@ public class RegionMembersMenu extends ConfigMenu<ProtectionPlugin> implements A
     public @NotNull ItemClick getObjectClick(@NotNull RegionMember member) {
         return (viewer, event) -> {
             this.region.removeMember(member);
+            this.region.save();
 
             plugin.getMessage(Lang.MENU_MEMBERS_KICK_SUCCESS)
                     .replace(Placeholders.MEMBER_NAME, member.getName())
                     .send(viewer.getPlayer());
+
+            this.openNextTick(viewer, 1);
         };
     }
 

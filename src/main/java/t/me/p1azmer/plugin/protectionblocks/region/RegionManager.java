@@ -168,9 +168,7 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         return true;
     }
 
-    public void tryCreateRegion(@NotNull Player player, @NotNull Block block, @NotNull ItemStack item) {
-        RegionBlock regionBlock = this.getRegionBlockByItem(item);
-        if (regionBlock == null) return;
+    public void tryCreateRegion(@NotNull Player player, @NotNull Block block, @NotNull ItemStack item, @NotNull RegionBlock regionBlock) {
         Region region = this.getRegionByBlock(block);
         if (region != null && !region.isAllowed(player)) return;
 
@@ -231,6 +229,8 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
 
     public void deleteRegion(@NotNull Region region, boolean notify) {
         if (!region.getFile().delete()) return;
+        this.getRegionMap().remove(region.getId(), region);
+
         region.clear();
         if (notify) {
             region.broadcast(plugin.getMessage(Lang.REGION_DESTROY_NOTIFY)
@@ -245,7 +245,6 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
                 UniParticle.redstone(Color.RED, 1).play(getPointOnCircle(loc.clone(), false, n4, n2, 1.0), 0.1f, 0.0f, 2);
             }
         }
-        this.getRegionMap().remove(region.getId());
     }
 
     public boolean tryDamageRegion(@Nullable Player player, @Nullable Object blockOrItem, @NotNull Block targetBlock, @NotNull Region region, @NotNull DamageType damageType, boolean notify) {
@@ -256,13 +255,16 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         AtomicBoolean result = new AtomicBoolean(false);
 
         region.getRegionBlock().ifPresent(regionBlock -> {
-            result.set(regionBlock.damage(damageType, blockOrItem));
-            if (region.isRegionBlock(targetBlock)) {
+            if (!regionBlock.damage(damageType, blockOrItem)) {
+                result.set(false);
+                return;
+            }
 
+            if (region.isRegionBlock(targetBlock)) {
                 region.takeBlockHealth(damageType);
                 if (region.getBlockHealth() == 0) {
                     region.getBlockLocation().getBlock().breakNaturally(new ItemStack(Material.AIR), true, true);
-                    this.deleteRegion(region, true);
+                    this.deleteRegion(region, false);
                     if (notify) {
                         if (player != null) {
                             plugin.getMessage(Lang.REGION_SUCCESS_DESTROY_TARGET)
@@ -304,8 +306,11 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
             return allowed;
         } else if (region.isRegionBlock(targetBlock) && (!Config.REGION_BLOCK_BREAK_OWNER_ONLY.get() || region.getOwner().equals(player.getUniqueId()))) {
             this.deleteRegion(region, false);
+
             region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DESTROY_SELF)
                     .replace(region.replacePlaceholders()));
+            targetBlock.breakNaturally(new ItemStack(Material.AIR));
+            region.getRegionBlock().ifPresent(regionBlock -> targetBlock.getWorld().dropItem(targetBlock.getLocation(), regionBlock.getItem()));
         }
         return true;
     }

@@ -32,12 +32,13 @@ public class Lang extends EngineLang {
     public static final LangKey REGION_ENTER_NOTIFY = LangKey.of("Messages.Region.Notify.Enter", GRAY + "You've entered a "+LIGHT_PURPLE+Placeholders.REGION_OWNER_NAME+GRAY+" region");
     public static final LangKey REGION_EXIT_NOTIFY = LangKey.of("Messages.Region.Notify.Exit", GRAY + "You've leave a "+LIGHT_PURPLE+Placeholders.REGION_OWNER_NAME+GRAY+" region");
     public static final LangKey REGION_ERROR_BREAK = LangKey.of("Messages.Region.Notify.Break", ORANGE + "Hey!"+GRAY+" I'm sorry, but you "+ORANGE+"can't break this block"+GRAY+" here!");
+    public static final LangKey REGION_ERROR_INTERACT = LangKey.of("Messages.Region.Notify.Interact", ORANGE + "Hey!"+GRAY+" I'm sorry, but you "+ORANGE+"can't interact with this"+GRAY+" here!");
 
 
     public static final LangKey MENU_REGION_NO_ACCESS = LangKey.of("Messages.Menu.No_Access", RED + "You don't have access to edit members!");
     public static final LangKey MENU_REGION_DEPOSIT_NO_ENOUGH_MONEY = LangKey.of("Messages.Menu.Deposit.No_Enough_Money", RED + "You don't have enough money to pay for it!");
     public static final LangKey MENU_REGION_DEPOSIT_SUCCESS = LangKey.of("Messages.Menu.Deposit.Success", GREEN + "The life of the region has been successfully paid for!");
-    public static final LangKey MENU_MEMBERS_KICK_SUCCESS = LangKey.of("Messages.Menu.Members.Kick.Success", GREEN + "Member "+LIGHT_YELLOW+Placeholders.PLAYER_NAME+GREEN+" success removed from region!");
+    public static final LangKey MENU_MEMBERS_KICK_SUCCESS = LangKey.of("Messages.Menu.Members.Kick.Success", GREEN + "Member "+LIGHT_YELLOW+Placeholders.MEMBER_NAME+GREEN+" success removed from region!");
 
     public static final LangKey Editor_Region_Block_Enter_Create        = new LangKey("Editor.Region.Block.Enter.Create", GRAY+"Enter "+GREEN+"unique "+GRAY+"block "+GREEN+"identifier"+GRAY+"...");
     public static final LangKey Editor_Region_Block_Enter_Name = new LangKey("Editor.Region.Block.Enter.Name", GRAY+"Enter "+GREEN+"name"+GRAY+"...");

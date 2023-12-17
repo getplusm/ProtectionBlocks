@@ -165,7 +165,8 @@ public class RGBlockMainEditor extends EditorMenu<ProtectionPlugin, RegionBlock>
 
     private void save(@NotNull MenuViewer viewer) {
         this.object.save();
-        this.plugin.runTask(task -> this.open(viewer.getPlayer(), viewer.getPage()));
+        this.plugin.runTaskAsync(async-> this.plugin.getRegionManager().getRegions().forEach(this.object::updateHologram));
+        this.openNextTick(viewer.getPlayer(), viewer.getPage());
     }
 
     @Override

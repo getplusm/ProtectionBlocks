@@ -45,7 +45,7 @@ Messages:
       Success: '#aefd5eЖизнь региона продлена!'
     Members:
       Kick:
-        Success: '#aefd5eУчастник #ffeea2%player_name%#aefd5e успешно удален из региона!'
+        Success: '#aefd5eУчастник #ffeea2%member_name%#aefd5e успешно удален из региона!'
     No_Access: '#fd5e5eYou don''t have access to edit members!'
 Editor:
   Region:

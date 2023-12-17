@@ -4,7 +4,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -36,23 +38,26 @@ public class RegionListener extends AbstractListener<ProtectionPlugin> {
         Region region = this.manager.getRegionByBlock(block);
 
         if (region != null) {
-                BlockPlaceRegionEvent calledEvent = new BlockPlaceRegionEvent(event.getPlayer(), block, region);
-                this.plugin.getPluginManager().callEvent(calledEvent);
-                event.setCancelled(calledEvent.isCancelled() || this.manager.tryBlockPlaceRegion(event.getPlayer(), region));
+            if (regionBlock != null){
+                event.setCancelled(true);
+                return;
+            }
+            BlockPlaceRegionEvent calledEvent = new BlockPlaceRegionEvent(event.getPlayer(), block, region);
+            this.plugin.getPluginManager().callEvent(calledEvent);
+            event.setCancelled(calledEvent.isCancelled() || !this.manager.tryBlockPlaceRegion(event.getPlayer(), region));
+            return;
+        }
+        if (regionBlock == null) return;
+
+        // Check for nearby regions
+        Cuboid preCuboid = new Cuboid(block.getLocation().clone().add(-regionBlock.getRegionSize(), -regionBlock.getRegionSize(), -regionBlock.getRegionSize()), block.getLocation().clone().add(regionBlock.getRegionSize(), regionBlock.getRegionSize(), regionBlock.getRegionSize()));
+        if (preCuboid.getBlocks().stream().anyMatch(this.manager::isProtectedBlock)) {
+            plugin.getMessage(Lang.REGION_ERROR_CREATED_NEARBY_RG).send(event.getPlayer());
+            event.setCancelled(true);
             return;
         }
         CompletableFuture.runAsync(() -> {
-
-            // Check for nearby regions
-            if (regionBlock != null) {
-                Cuboid preCuboid = new Cuboid(block.getLocation().clone().add(-regionBlock.getRegionSize(), -regionBlock.getRegionSize(), -regionBlock.getRegionSize()), block.getLocation().clone().add(regionBlock.getRegionSize(), regionBlock.getRegionSize(), regionBlock.getRegionSize()));
-                if (preCuboid.getBlocks().stream().anyMatch(this.manager::isProtectedBlock)) {
-                    plugin.getMessage(Lang.REGION_ERROR_CREATED_NEARBY_RG).send(event.getPlayer());
-                    event.setBuild(false);
-                    return;
-                }
-            }
-            this.manager.tryCreateRegion(event.getPlayer(), block, item); // async create
+            this.manager.tryCreateRegion(event.getPlayer(), block, item, regionBlock); // async create
         });
     }
 
