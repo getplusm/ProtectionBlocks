@@ -3,7 +3,7 @@ package t.me.p1azmer.plugin.protectionblocks;
 import t.me.p1azmer.engine.api.server.JPermission;
 
 public class Perms {
-    private static final String PREFIX = "protectionstones.";
+    private static final String PREFIX = "protectionblocks.";
     private static final String PREFIX_COMMAND = PREFIX + "command.";
 
     public static final JPermission PLUGIN = new JPermission(PREFIX + Placeholders.WILDCARD, "Access to all the plugin functions.");
