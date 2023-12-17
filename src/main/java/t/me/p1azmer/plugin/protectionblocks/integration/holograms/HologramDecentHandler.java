@@ -9,28 +9,28 @@ import t.me.p1azmer.engine.utils.LocationUtil;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
-import t.me.p1azmer.plugin.protectionblocks.region.Region;
-import t.me.p1azmer.plugin.protectionblocks.region.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 
 import java.util.*;
 
 public class HologramDecentHandler implements HologramHandler {
 
-    private final Map<String, Set<Hologram>> holoMap;
+    private Map<String, Set<Hologram>> holoMap;
 
     public HologramDecentHandler(@NotNull ProtectionPlugin plugin) {
-        this.holoMap = new HashMap<>();
     }
 
     @Override
     public void setup() {
-
+        this.holoMap = new HashMap<>();
     }
 
     @Override
     public void shutdown() {
-        this.holoMap.values().forEach(set -> set.forEach(Hologram::delete));
-        this.holoMap.clear();
+        if (this.holoMap != null) {
+            this.holoMap.values().forEach(set -> set.forEach(Hologram::delete));
+            this.holoMap = null;
+        }
     }
 
     @Override
@@ -63,19 +63,9 @@ public class HologramDecentHandler implements HologramHandler {
 
     @Override
     public void show(@NotNull Region region, @NotNull Player player) {
-        Set<Hologram> set = new HashSet<>(this.holoMap.getOrDefault(region.getId(), new HashSet<>()));
-        if (set.isEmpty()) {
-            region.getRegionBlock().ifPresent(regionBlock -> {
+        Set<Hologram> set = this.holoMap.get(region.getId());
+        if (set == null) return;
 
-                Hologram hologram = DHAPI.createHologram(UUID.randomUUID().toString(), this.fineLocation(region.getBlockLocation()), regionBlock.getHologramText(region));
-                if (regionBlock.isHologramInRegion()) {
-                    hologram.setDefaultVisibleState(false);
-                    hologram.hideAll();
-                } else
-                    hologram.showAll();
-                set.add(hologram);
-            });
-        }
         set.forEach(hologram -> {
             hologram.removeHidePlayer(player);
             hologram.setShowPlayer(player);
@@ -85,7 +75,9 @@ public class HologramDecentHandler implements HologramHandler {
 
     @Override
     public void hide(@NotNull Region region, @NotNull Player player) {
-        Set<Hologram> set = new HashSet<>(this.holoMap.getOrDefault(region.getId(), new HashSet<>()));
+        Set<Hologram> set = this.holoMap.get(region.getId());
+        if (set == null) return;
+
         region.getRegionBlock().ifPresentOrElse(regionBlock -> {
             if (!regionBlock.isHologramInRegion()) return;
 

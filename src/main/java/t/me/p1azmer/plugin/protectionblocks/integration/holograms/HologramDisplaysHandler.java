@@ -10,7 +10,7 @@ import t.me.p1azmer.engine.utils.LocationUtil;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
-import t.me.p1azmer.plugin.protectionblocks.region.Region;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 
 import java.util.HashMap;
 import java.util.HashSet;

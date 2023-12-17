@@ -14,14 +14,12 @@ import t.me.p1azmer.plugin.protectionblocks.ProtectionAPI;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
 
 public class RegionBreaker implements IPlaceholderMap {
-    private final String id;
     private ItemStack item;
     private RegionManager.DamageType damageType;
 
     private final PlaceholderMap placeholderMap;
 
-    public RegionBreaker(@NotNull String id, @NotNull ItemStack item, @NotNull RegionManager.DamageType damageType) {
-        this.id = id;
+    public RegionBreaker(@NotNull ItemStack item, @NotNull RegionManager.DamageType damageType) {
         this.item = item;
         this.damageType = damageType;
 
@@ -42,16 +40,15 @@ public class RegionBreaker implements IPlaceholderMap {
         return RegionManager.DamageType.HAND;
     }
 
-    public static RegionBreaker read(@NotNull JYML cfg, @NotNull String path, @NotNull String id) {
+    public static RegionBreaker read(@NotNull JYML cfg, @NotNull String path) {
         ItemStack item = cfg.getItemEncoded(path + ".Item");
         if (item == null)
             item = new ItemStack(Material.BARRIER);
         RegionManager.DamageType damageType = cfg.getEnum(path + ".Damage_Type", RegionManager.DamageType.class, RegionManager.DamageType.HAND);
-        return new RegionBreaker(id, item, damageType);
+        return new RegionBreaker( item, damageType);
     }
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
-        cfg.set(path + ".Id", this.getId());
         cfg.setItemEncoded(path + ".Item", this.getItem());
         cfg.set(path + ".Damage_Type", this.getDamageType());
     }
@@ -87,11 +84,6 @@ public class RegionBreaker implements IPlaceholderMap {
             }
         }
         return false;
-    }
-
-    @NotNull
-    public String getId() {
-        return id;
     }
 
     @NotNull

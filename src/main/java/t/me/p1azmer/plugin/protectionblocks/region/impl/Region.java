@@ -1,20 +1,28 @@
-package t.me.p1azmer.plugin.protectionblocks.region;
+package t.me.p1azmer.plugin.protectionblocks.region.impl;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import t.me.p1azmer.engine.api.config.JYML;
+import t.me.p1azmer.engine.api.lang.LangMessage;
 import t.me.p1azmer.engine.api.manager.AbstractConfigHolder;
 import t.me.p1azmer.engine.api.placeholder.IPlaceholderMap;
 import t.me.p1azmer.engine.api.placeholder.PlaceholderMap;
+import t.me.p1azmer.engine.lang.LangManager;
 import t.me.p1azmer.engine.utils.Colorizer;
+import t.me.p1azmer.engine.utils.NumberUtil;
+import t.me.p1azmer.engine.utils.TimeUtil;
 import t.me.p1azmer.plugin.protectionblocks.Keys;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
+import t.me.p1azmer.plugin.protectionblocks.config.Config;
+import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
+import t.me.p1azmer.plugin.protectionblocks.region.menu.RegionMembersMenu;
+import t.me.p1azmer.plugin.protectionblocks.region.menu.RegionMenu;
 import t.me.p1azmer.plugin.protectionblocks.utils.Cuboid;
 
 import java.util.*;
@@ -25,7 +33,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
     private Cuboid cuboid;
     private UUID owner;
     private String ownerName;
-    private List<UUID> members;
+    private final List<RegionMember> members;
     private long createTime;
     private long lastDeposit;
     private String regionBlockId;
@@ -34,16 +42,24 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
     private RegionBlock regionBlock;
     private int blockHealth;
 
+    // cache
+    private RegionMenu regionMenu;
+    private RegionMembersMenu membersMenu;
+
     public Region(@NotNull RegionManager manager, @NotNull JYML cfg) {
         super(manager.plugin(), cfg);
         this.manager = manager;
 
+        this.createTime = System.currentTimeMillis();
         this.members = new ArrayList<>();
         this.placeholderMap = new PlaceholderMap()
                 .add(Placeholders.REGION_ID, this::getId)
                 .add(Placeholders.REGION_OWNER_NAME, () -> Colorizer.apply(this.getOwnerName()))
                 .add(Placeholders.REGION_HEALTH, () -> String.valueOf(this.getBlockHealth()))
-                .add(Placeholders.REGION_LOCATION, () -> Placeholders.forLocation(this.getBlockLocation()).apply(Placeholders.LOCATION_WORLD + ": " + Placeholders.LOCATION_X + ", " + Placeholders.LOCATION_Y + ", " + Placeholders.LOCATION_Z))
+                .add(Placeholders.REGION_MEMBERS_AMOUNT, () -> NumberUtil.format(this.getMembers().size()))
+                .add(Placeholders.REGION_EXPIRE_IN, () -> this.getLastDeposit() == -1 ? Colorizer.apply(Config.UNBREAKABLE.get()) : TimeUtil.formatTimeLeft(this.getLastDeposit()))
+                .add(Placeholders.REGION_CREATION_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getCreateTime()))
+                .add(Placeholders.REGION_LOCATION, () -> Placeholders.forLocation(this.getBlockLocation()).apply((Placeholders.LOCATION_WORLD + ": " + Placeholders.LOCATION_X + ", " + Placeholders.LOCATION_Y + ", " + Placeholders.LOCATION_Z).replace(Placeholders.LOCATION_WORLD, LangManager.getWorld(this.getBlockLocation().getWorld()))))
         ;
     }
 
@@ -65,10 +81,12 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
 
         this.owner = UUID.fromString(this.cfg.getString("Owner", ""));
         this.ownerName = this.cfg.getString("Owner_Name", "");
-        this.members = this.cfg.getStringList("Members").stream().map(UUID::fromString).collect(Collectors.toList());
         this.createTime = this.cfg.getLong("Time.Create");
         this.lastDeposit = this.cfg.getLong("Time.Last_Deposit");
         this.blockHealth = this.cfg.getInt("Cache.Health", 1);
+        for (String sId : cfg.getSection("Members.List")) {
+            this.getMembers().add(RegionMember.read(this.cfg, "Members.List." + sId));
+        }
         return true;
     }
 
@@ -80,14 +98,19 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         cfg.set("Bounds.From", this.getCuboid().getMin());
         cfg.set("Bounds.To", this.getCuboid().getMax());
         cfg.set("Owner", this.getOwner().toString());
-        cfg.set("Members", this.getMembers().stream().map(UUID::toString).collect(Collectors.toList()));
         cfg.set("Time.Create", this.getCreateTime());
         cfg.set("Time.Last_Deposit", this.getLastDeposit());
         cfg.set("Cache.Health", this.getBlockHealth());
         cfg.set("Owner_Name", this.getOwnerName());
+        int i = 0;
+        for (RegionMember member : this.getMembers()) {
+            member.write(cfg, "Members.List." + (i++));
+        }
     }
 
     public void loadLocations() {
+        if (!this.getBlockLocation().isChunkLoaded())
+            this.getBlockLocation().getWorld().loadChunk(this.getBlockLocation().getChunk());
         Block block = this.getBlockLocation().getBlock();
         this.getRegionBlock().ifPresent(regionBlock -> {
             if (!block.getType().equals(regionBlock.getItem().getType()))
@@ -99,6 +122,26 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
 
     public void clear() {
         this.getRegionBlock().ifPresent(regionBlock -> regionBlock.removeHologram(this));
+        if (this.regionMenu != null)
+            this.regionMenu.clear();
+        if (this.membersMenu != null) {
+            this.membersMenu.clear();
+        }
+    }
+
+    @NotNull
+    public RegionMenu getRegionMenu() {
+        if (this.regionMenu == null)
+            this.regionMenu = new RegionMenu(this);
+        return regionMenu;
+    }
+
+    @NotNull
+    public RegionMembersMenu getMembersMenu() {
+        if (this.membersMenu == null) {
+            this.membersMenu = new RegionMembersMenu(this);
+        }
+        return this.membersMenu;
     }
 
     @NotNull
@@ -109,6 +152,11 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
     public boolean isRegionBlock(@NotNull Block block) {
         MetadataValue metadataValue = block.hasMetadata(Keys.REGION_BLOCK.getKey()) ? block.getMetadata(Keys.REGION_BLOCK.getKey()).get(0) : null;
         return this.getBlockLocation().getBlock().equals(block) || metadataValue != null && metadataValue.asString().equals(this.getId());
+    }
+
+    @NotNull
+    public RegionManager getManager() {
+        return manager;
     }
 
     @NotNull
@@ -126,19 +174,43 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         return owner;
     }
 
+    public boolean isOwner(@NotNull UUID uuid) {
+        return this.getOwner().equals(uuid);
+    }
+
     @NotNull
     public String getOwnerName() {
         return ownerName;
     }
 
     @NotNull
-    public List<UUID> getMembers() {
+    public List<RegionMember> getMembers() {
         return members;
     }
 
+    @Nullable
+    public RegionMember getMemberByName(@NotNull String name) {
+        return this.getMembers().stream().filter(f -> f.getName().equals(name)).findFirst().orElse(null);
+    }
+
+    @Nullable
+    public RegionMember getMemberById(@NotNull UUID uuid) {
+        return this.getMembers().stream().filter(f -> f.getId().equals(uuid)).findFirst().orElse(null);
+    }
+
+    @Nullable
+    public RegionMember getMemberByPlayer(@NotNull Player player) {
+        return this.getMemberById(player.getUniqueId());
+    }
+
+    public boolean isMember(@NotNull UUID id) {
+        return this.getMemberById(id) != null;
+    }
+
+
     @NotNull
     public Collection<Player> getOnlineMembers() {
-        return new ArrayList<>(Bukkit.getOnlinePlayers().stream().filter(f -> this.getMembers().contains(f.getUniqueId()) || f.getUniqueId().equals(this.getOwner())).collect(Collectors.toList()));
+        return this.getMembers().parallelStream().filter(founder -> founder.getPlayer() != null && founder.getPlayer().isOnline()).map(RegionMember::getPlayer).collect(Collectors.toList());
     }
 
     public long getCreateTime() {
@@ -147,6 +219,11 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
 
     public long getLastDeposit() {
         return lastDeposit;
+    }
+
+    public boolean isExpired() {
+        if (this.getLastDeposit() == -1) return false;
+        return System.currentTimeMillis() >= this.getLastDeposit();
     }
 
     public int getBlockHealth() {
@@ -159,7 +236,6 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
     }
 
     public void takeBlockHealth(@NotNull RegionManager.DamageType damageType) {
-
         this.blockHealth -= 1;
         if (this.blockHealth < 0) this.blockHealth = 0;
     }
@@ -209,34 +285,45 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         this.ownerName = ownerName;
     }
 
-    public void setMembers(@NotNull List<UUID> members) {
-        this.members = members;
-    }
-
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
-
     public void setLastDeposit(long lastDeposit) {
         this.lastDeposit = lastDeposit;
+    }
+
+    public void addDeposit(long depositTime) {
+        this.lastDeposit += depositTime;
+        this.save();
     }
 
     public void setRegionBlockId(@NotNull String regionBlockId) {
         this.regionBlockId = regionBlockId;
     }
 
-    public void addMember(@NotNull UUID user) {
-        this.getMembers().add(user);
+    public void addMember(@NotNull Player player) {
+        this.getMembers().add(RegionMember.of(player));
         this.save();
     }
 
-    public void removeMember(@NotNull UUID user) {
-        this.getMembers().remove(user);
+    public void removeMember(@NotNull Player player) {
+        RegionMember member = this.getMemberByPlayer(player);
+        if (member == null) return;
+        this.removeMember(member);
+    }
+
+    public void removeMember(@NotNull RegionMember member) {
+        this.getMembers().remove(member);
         this.save();
     }
 
     public boolean isAllowed(@NotNull Player player) {
-        return this.getOwner().equals(player.getUniqueId()) || this.getMembers().contains(player.getUniqueId());
+        return this.isAllowed(player.getUniqueId());
+    }
+
+    public boolean isAllowed(@NotNull UUID uuid) {
+        if (this.isExpired()) {
+            this.manager.deleteRegion(this, true);
+            return true;
+        }
+        return this.isOwner(uuid) || this.isMember(uuid);
     }
 
     public void updateDeposit() {
@@ -244,8 +331,8 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         this.save();
     }
 
-    public void broadcast(@NotNull String... message) {
-        this.getOnlineMembers().forEach(f -> f.sendMessage(Colorizer.apply(Arrays.asList(message)).toArray(String[]::new)));
+    public void broadcast(@NotNull LangMessage... message) {
+        this.getOnlineMembers().forEach(player -> Arrays.stream(message).toList().forEach(langMessage -> langMessage.send(player)));
     }
 
     public void updateHologram(@NotNull Player player, boolean show) {

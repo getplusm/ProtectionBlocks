@@ -1,0 +1,184 @@
+# Here you can create your own custom placeholders to use it in language config.
+# Key = Placeholder, Value = Replacer.
+Placeholders:
+  '%red%': '#fd5e5e'
+  '%gray%': '#d4d9d8'
+  '%green%': '#aefd5e'
+Command:
+  Editor:
+    Desc: Открыть редактор регионов
+  Give:
+    Desc: Выдать блок региона игроку
+    Usage: <блок региона> <игрок> <кол-во>
+    Done: Выдано &ax%amount% %region_block_name%&7 игроку &a%player_name%&7.
+Error:
+  Region_Block:
+    Invalid: '#fd5e5eНеверный блок региона!'
+Messages:
+  Region:
+    Success:
+      Created: '#aefd5eНовый регион успешно создан!'
+      Deleted: '#aefd5eРегион #d4d9d8⧈%region_id%#aefd5e успешно удален!'
+      Destroy:
+        Self: '#aefd5eРегион #d4d9d8⧈%region_id%#aefd5e успешно удален!'
+        Target: '#e39fffВы разрушили регион #d4d9d8⧈%region_id%#e39fff!'
+      Damaged:
+        Target: '#aefd5eРегион #d4d9d8⧈%region_id%#aefd5e получил урон, но не сломался'
+        Self:
+          - <! prefix:\"false\" !>"
+          - '#fd5e5e&l!! ВНИМАНИЕ !!'
+          - '#5e9dfdВаш регион #fdba5e%region_location%#5e9dfd получил урон!#fd5e5e'
+          - У него осталось &l%region_health%#fd5e5e жизней до разрушения!
+    Notify:
+      Destroy:
+        - <! prefix:\"false\" !>"
+        - '#fd5e5e&l!! ВНИМАНИЕ !!'
+        - '#5e9dfdВаш регион #fdba5e%region_location%#5e9dfd разрушен!'
+      Enter: '#d4d9d8Вы вошли в регион игрока #e39fff%region_owner_name%#d4d9d8.'
+      Exit: '#d4d9d8Вы покинули регион игрока #e39fff%region_owner_name%#d4d9d8.'
+      Break: '#fdba5eЭй!#d4d9d8 Прости, но тебе #fdba5eнельзя ломать этот блок#d4d9d8 здесь!'
+    Error:
+      Nearby_Region: '#fd5e5eYou cannot create a region here, as it will cross over with another one!'
+  Menu:
+    Deposit:
+      No_Enough_Money: '#fd5e5eУ Вас недостаточно денег, чтобы внести депозит!'
+      Success: '#aefd5eЖизнь региона продлена!'
+    Members:
+      Kick:
+        Success: '#aefd5eУчастник #ffeea2%player_name%#aefd5e успешно удален из региона!'
+    No_Access: '#fd5e5eYou don''t have access to edit members!'
+Editor:
+  Region:
+    Block:
+      Enter:
+        Create: '#d4d9d8Введите #aefd5eуникальный #d4d9d8идентификатор блока #aefd5e...'
+        Name: '#d4d9d8Введите #aefd5eимя#d4d9d8...'
+        Currency: '#d4d9d8Введите #aefd5eвалюту#d4d9d8...'
+        Value: '#d4d9d8Введите #aefd5eзначение#d4d9d8...'
+        Life_Time: '#d4d9d8Введите #aefd5eимя #d4d9d8и #aefd5eвремя в секундах#d4d9d8...'
+        HologramTemplate: '#d4d9d8Введите #aefd5eшаблон голограммы#d4d9d8...'
+      Error:
+        Exist: '&cБлок уже существует!'
+        Currency:
+          Not_Found: '&cВалюта не найдена!'
+      Object:
+        Name: '#ead931&l%region_block_name% &7(ID: &f%region_block_id%&7)'
+        Lore:
+          - '#aaa8a8(#e8f2f2Левый-Клик#aaa8a8 для настройки#aaa8a8)'
+          - '#aaa8a8(#e8f2f2ШИФТ+ПКМ#aaa8a8 для удаления #fd5e5e(Не отменить)#aaa8a8)'
+      Create:
+        Name: '#ead931&lНовый блок региона'
+        Lore: []
+      Change:
+        Item:
+          Name: ''
+          Lore:
+            - '#aaa8a8Предмет блока'
+            - ''
+            - '#aaa8a8Задает блок региона.'
+            - '#aaa8a8Этот блок будет использоваться как корень региона.'
+            - ''
+            - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы заменить предмет#aaa8a8)'
+            - '#aaa8a8(#e8f2f2Правый-Клик#aaa8a8 для копии#aaa8a8)'
+        Name:
+          Name: '#ead931&lИмя'
+          Lore:
+            - '#aaa8a8Задает отображаемое имя блока.'
+            - '#aaa8a8Используется в сообщениях, меню и голограммах.'
+            - ''
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Отображаемое Имя: #ead931%region_block_name%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+        Size:
+          Name: '#ead931&lРазмер Региона'
+          Lore:
+            - '#aaa8a8Задает размер региона для этого блока.'
+            - ''
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Радиус: #ead931%region_block_size%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+        Strength:
+          Name: '#ead931&lПрочность Региона'
+          Lore:
+            - '#aaa8a8Задает прочность блока региона.'
+            - '#aaa8a8Блок должен быть сломан'
+            - '#aaa8a8столько раз, сколько его прочность.'
+            - ''
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Прочность: #ead931%region_block_strength%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+        Deposit:
+          Name: '#ead931&lДепозит Региона'
+          Lore:
+            - '#aaa8a8Задает сумму продления жизни блока.'
+            - '#aaa8a8Задает валюту для оплаты.'
+            - ''
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Цена: #ead931%region_block_deposit_price%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+            - '#ead931▪ #aaa8a8Валюта: #ead931%region_block_deposit_currency%#d4d9d8 (#e8f2f2Правый-Клик#d4d9d8)'
+        Hologram:
+          Name: '#ead931&lГолограмма'
+          Lore:
+            - '#aaa8a8Создает голограмму над блоком.'
+            - '#aaa8a8с определенным текстовым шаблоном.'
+            - '#aaa8a8#d4d9d8Пример:'
+            - '#aaa8a8#d4d9d8Вы можете отключить голограмму и создать ''невидимый'' регион.'
+            - '#aaa8a8'
+            - '#aaa8a8#d4d9d8Если установлено значение #ffeea2В Регионе#d4d9d8,'
+            - '#aaa8a8#d4d9d8голограмма региона будет отображаться только'
+            - '#aaa8a8#d4d9d8при нахождении игрока в регионе.'
+            - ''
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Только в Регионе: #ead931%region_block_hologram_in_region%#d4d9d8 (#e8f2f2[Q] Кнопка выброса#d4d9d8)'
+            - '#ead931▪ #aaa8a8Включено: #ead931%region_block_hologram_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+            - '#ead931▪ #aaa8a8Шаблон: #ead931%region_block_hologram_template%#d4d9d8 (#e8f2f2Правый-Клик#d4d9d8)'
+        Life_Time:
+          Name: '#ead931&lСрок Жизни Региона'
+          Lore:
+            - '#aaa8a8Все регионы могут иметь'
+            - '#aaa8a8срок службы с продлением.'
+            - '#aaa8a8Можно добавить группу и'
+            - '#aaa8a8установить любое время для нее.'
+            - '#aaa8a8После этого времени регион будет'
+            - '#aaa8a8удален, а также сам блок.'
+            - '#aaa8a8'
+            - '#aaa8a8#fd5e5eВы можете изменить это только в файле &lconfig.yml#fd5e5e'
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Включено: #ead931%region_block_life_time_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+      Breakers:
+        Navigate:
+          Name: '#ead931&lРазрушители Региона'
+          Lore:
+            - '#aaa8a8#fdf35eРазрушители #d4d9d8-#ffeea2 предметы, которые могут разрушить этот блок'
+            - '#aaa8a8(#e8f2f2Левый-Клик#aaa8a8 для навигации#aaa8a8)'
+        Create:
+          Name: '#ead931&lНовый Разрушитель'
+          Lore:
+            - ''
+            - '#aaa8a8#aefd5eПримечание#d4d9d8:'
+            - '#aaa8a8Если вы добавили TNT,'
+            - '#aaa8a8это означает, что блок может быть'
+            - '#aaa8a8разрушен взрывом TNT'
+            - ''
+            - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы добавить#aaa8a8)'
+        Clear:
+          Name: '#ead931&lОчистить разрушители'
+          Lore:
+            - '#aaa8a8(#e8f2f2Левый-Клик#aaa8a8 для очистки#aaa8a8)'
+        Object:
+          Name: ''
+          Lore:
+            - '#ead931▪ #aaa8a8Тип Урона: #ead931%region_block_breaker_damage_type%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+            - ''
+            - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы заменить предмет#aaa8a8)'
+            - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы удалить #fd5e5e(Не отменить)#aaa8a8)'
+    Members:
+      Error:
+        Player:
+          Not_Found: '&cИгрок не найден!'
+          Already: '&cИгрок уже добавлен в этот регион!'
+    Enter:
+      Player_Name: '#d4d9d8Введите #aefd5eимя игрока#d4d9d8...'
+DamageType:
+  EXPLODE: Взрыв
+  HAND: Рука
+  TOOLS: Инструменты
+  FALLING_BLOCK: Падающие блоки
+  BLOCK_PLACE: Поставление блока

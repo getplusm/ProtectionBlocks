@@ -1,0 +1,70 @@
+Settings:
+  # Sets the GUI title.
+  Title: '#5d6d7e&l      Region Settings'
+  # Sets the GUI size. Must be multiply of 9.
+  # Useful for 'CHEST' Inventory Type only.
+  Size: 36
+  Auto_Refresh: 1
+
+Content:
+  close:
+    Priority: 5
+    Slots: 31
+    Type: CLOSE
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==
+      Name: '#FF5733(✕) &lExit'
+
+  members:
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture:
+      Name: '#ee9aff&lMembers'
+      Lore:
+        - '#ee9aff▪ #ddeceeTotal: #ee9aff%region_members_amount%'
+        - ''
+        - '#ddeceeList of players who can'
+        - '#ddeceeinteract with the region.'
+        - ''
+        - '#9af7ff&lActions:'
+        - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffNavigate'
+    Slots: 10
+    Type: MEMBERS
+
+  deposit:
+    Item:
+      Material: HOPPER
+      Name: '#ee9aff&lDeposit'
+      Lore:
+        - '#ee9aff▪ #ddeceeExpire: #ee9aff%region_expire_in%'
+        - ''
+        - '#ddeceeThe lifetime of your region.'
+        - '#ddeceeWhen the time expires,'
+        - '#ddeceethe region block will be destroyed'
+        - ''
+        - '#ee9aff▪ #ddeceePrice: #ee9aff%price%'
+        - ''
+        - '#9af7ff&lActions:'
+        - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffDeposit money'
+    Slots: 13
+    Type: DEPOSIT
+  info:
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDAxYWZlOTczYzU0ODJmZGM3MWU2YWExMDY5ODgzM2M3OWM0MzdmMjEzMDhlYTlhMWEwOTU3NDZlYzI3NGEwZiJ9fX0=
+      Name: '%region_block_name% &6%region_block_size%x%region_block_size%'
+      Lore:
+        - '#ee9aff&lInfo:'
+        - '#ee9aff▪ #ddeceeExpire: #ee9aff%region_expire_in%'
+        - '#ee9aff▪ #ddeceeHealth: #ee9aff%region_health%&8/#ee9aff%region_block_strength%'
+        - '#ee9aff▪ #ddeceeMembers: #ee9aff%region_members_amount%'
+        - '#ee9aff▪ #ddeceeCreated: #ee9aff%region_creation_time% ago'
+        - '#979A9B&m                                                                  '
+        - '#ddeceeMy region is #fd5e5eunbreakable#ddecee, what is that?'
+        - '#EEF9FAThis means this region will not be destroyed'
+        - '#EEF9FAafter a certain period of time, but'
+        - '#EEF9FAplayers can destroy it.'
+        - '#979A9B&m                                                                  '
+
+    Slots: 16

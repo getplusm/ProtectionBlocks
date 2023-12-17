@@ -3,7 +3,7 @@ package t.me.p1azmer.plugin.protectionblocks.api.integration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import t.me.p1azmer.engine.api.manager.Loadable;
-import t.me.p1azmer.plugin.protectionblocks.region.Region;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 
 public interface HologramHandler extends Loadable {
 

@@ -15,7 +15,7 @@ import t.me.p1azmer.engine.utils.StringUtil;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
 import t.me.p1azmer.plugin.protectionblocks.editor.EditorLocales;
-import t.me.p1azmer.plugin.protectionblocks.region.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
 
 import java.util.Comparator;

@@ -20,7 +20,7 @@ import t.me.p1azmer.engine.utils.PlayerUtil;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.RegionBreaker;
 import t.me.p1azmer.plugin.protectionblocks.editor.EditorLocales;
-import t.me.p1azmer.plugin.protectionblocks.region.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class RGBlockBreakersListEditor extends EditorMenu<ProtectionPlugin, Regi
             ItemStack cursor = event.getCursor();
             if (!cursor.getType().isAir()) {
                 List<RegionBreaker> breakers = new ArrayList<>(regionBlock.getBreakers());
-                breakers.add(new RegionBreaker(String.valueOf(breakers.size() + 1), cursor, RegionBreaker.foundDMGType(cursor.getType())));
+                breakers.add(new RegionBreaker(cursor, RegionBreaker.foundDMGType(cursor.getType())));
                 regionBlock.setBreakers(breakers);
                 PlayerUtil.addItem(viewer.getPlayer(), cursor);
                 event.getView().setCursor(null);

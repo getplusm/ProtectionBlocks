@@ -4,7 +4,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import t.me.p1azmer.plugin.protectionblocks.region.Region;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 
 
 public class BlockPlaceRegionEvent extends RegionEvent {

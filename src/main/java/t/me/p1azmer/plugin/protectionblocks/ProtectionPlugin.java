@@ -11,6 +11,7 @@ import t.me.p1azmer.plugin.protectionblocks.commands.EditorCommand;
 import t.me.p1azmer.plugin.protectionblocks.commands.GiveCommand;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
+import t.me.p1azmer.plugin.protectionblocks.currency.CurrencyManager;
 import t.me.p1azmer.plugin.protectionblocks.editor.EditorLocales;
 import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramDecentHandler;
 import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramDisplaysHandler;
@@ -19,6 +20,7 @@ import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
 public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> {
     private RegionManager regionManager;
     private HologramHandler hologramHandler;
+    private CurrencyManager currencyManager;
 
     @Override
     protected @NotNull ProtectionPlugin getSelf() {
@@ -28,6 +30,9 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> {
     @Override
     public void enable() {
         this.setupHologramHandler();
+
+        this.currencyManager = new CurrencyManager(this);
+        this.currencyManager.setup();
 
         this.regionManager = new RegionManager(this);
         this.regionManager.setup();
@@ -44,14 +49,20 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> {
             this.regionManager.shutdown();
             this.regionManager = null;
         }
+        if (this.currencyManager != null){
+            this.currencyManager.shutdown();
+            this.currencyManager = null;
+        }
     }
 
     private void setupHologramHandler() {
         boolean hd = EngineUtils.hasPlugin("HolographicDisplays");
         if (hd) {
             this.hologramHandler = new HologramDisplaysHandler(this);
+            this.hologramHandler.setup();
         } else if (EngineUtils.hasPlugin("DecentHolograms")) {
             this.hologramHandler = new HologramDecentHandler(this);
+            this.hologramHandler.setup();
         }
 
 
@@ -100,5 +111,10 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> {
     @Nullable
     public HologramHandler getHologramHandler() {
         return hologramHandler;
+    }
+
+    @NotNull
+    public CurrencyManager getCurrencyManager() {
+        return currencyManager;
     }
 }

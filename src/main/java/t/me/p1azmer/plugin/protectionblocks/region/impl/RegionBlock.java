@@ -1,6 +1,5 @@
-package t.me.p1azmer.plugin.protectionblocks.region;
+package t.me.p1azmer.plugin.protectionblocks.region.impl;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,23 +15,30 @@ import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.RegionBreaker;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
+import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
 import t.me.p1azmer.plugin.protectionblocks.region.editor.RGBlockMainEditor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import static t.me.p1azmer.engine.utils.Constants.DEFAULT;
 
 public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implements IPlaceholderMap {
     private ItemStack item;
     private String name;
     private int strength;
-    private PlayerRankMap<Long> lifeTime;
+    private boolean lifeTimeEnabled;
+    private PlayerRankMap<Integer> lifeTime;
     private int regionSize;
     private List<RegionBreaker> breakers;
     private boolean hologramEnabled;
     private boolean hologramInRegion;
     private String hologramTemplate;
+
+    private int depositPrice;
+    private String currencyId;
 
     private final PlaceholderMap placeholderMap;
 
@@ -50,6 +56,9 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
                 .add(Placeholders.REGION_BLOCK_NAME, () -> Colorizer.apply(this.getName()))
                 .add(Placeholders.REGION_BLOCK_SIZE, () -> String.valueOf(this.getRegionSize()))
                 .add(Placeholders.REGION_BLOCK_STRENGTH, () -> String.valueOf(this.getStrength()))
+                .add(Placeholders.REGION_BLOCK_DEPOSIT_PRICE, ()-> String.valueOf(this.getDepositPrice()))
+                .add(Placeholders.REGION_BLOCK_DEPOSIT_CURRENCY, this::getCurrencyId)
+                .add(Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED, () -> LangManager.getBoolean(this.isLifeTimeEnabled()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_ENABLED, () -> LangManager.getBoolean(this.isHologramEnabled()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_IN_REGION, () -> LangManager.getBoolean(this.isHologramInRegion()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_TEMPLATE, this::getHologramTemplate)
@@ -62,16 +71,18 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         this.setHologramInRegion(cfg.getBoolean("Block.Hologram.In_Region"));
         this.setHologramTemplate(cfg.getString("Block.Hologram.Template", Placeholders.DEFAULT));
         this.name = cfg.getString("Name", this.getName());
-        if (cfg.contains("Life_Time"))
-            this.lifeTime = PlayerRankMap.readLong(cfg, "Life_Time").setNegativeBetter(true);
+        this.setLifeTimeEnabled(cfg.getBoolean("Life_Time.Enabled"));
+        if (cfg.contains("Life_Time.Parameter") && this.isLifeTimeEnabled())
+            this.lifeTime = PlayerRankMap.readInt(cfg, "Life_Time.Parameter");
         this.item = cfg.getItemEncoded("Item");
+        this.setDepositPrice(cfg.getInt("Region.Deposit.Price", 100));
         this.regionSize = cfg.getInt("Region.Size", 5);
         this.strength = cfg.getInt("Region.Strength", 1);
 
-        for (String id : cfg.getSection("Region.Breakers")){
-            String path = "Region.Breakers."+id;
-            this.breakers.add(RegionBreaker.read(cfg, path, id));
+        for (String sId : cfg.getSection("Region.Breakers.List")) {
+            this.getBreakers().add(RegionBreaker.read(cfg, "Region.Breakers.List." + sId));
         }
+        this.setCurrencyId(cfg.getString("Region.Deposit.Currency_Id", "Vault"));
         return true;
     }
 
@@ -82,14 +93,18 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         cfg.set("Block.Hologram.Template", this.getHologramTemplate());
 
         if (this.getLifeTime() != null)
-            this.getLifeTime().write(cfg, "Life_Time");
+            this.getLifeTime().write(cfg, "Life_Time.Parameter");
+        cfg.set("Life_Time.Enabled", this.isLifeTimeEnabled());
         cfg.setItemEncoded("Item", this.getItem());
         cfg.set("Name", this.getName());
         cfg.set("Region.Size", this.getRegionSize());
+        cfg.set("Region.Deposit.Price", this.getDepositPrice());
+        cfg.set("Region.Deposit.Currency_Id", this.getCurrencyId());
         cfg.set("Region.Strength", this.getStrength());
         cfg.set("Region.Breakers", null);
+        int i = 0;
         for (RegionBreaker breaker : this.getBreakers()){
-            breaker.write(cfg, "Region.Breakers");
+            breaker.write(cfg, "Region.Breakers.List."+ (i++));
         }
     }
 
@@ -131,16 +146,8 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         return hologramInRegion;
     }
 
-    public void setHologramInRegion(boolean hologramInRegion) {
-        this.hologramInRegion = hologramInRegion;
-    }
-
     public boolean isHologramEnabled() {
         return this.hologramEnabled;
-    }
-
-    public void setHologramEnabled(boolean hologramEnabled) {
-        this.hologramEnabled = hologramEnabled;
     }
 
     @NotNull
@@ -148,8 +155,12 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         return hologramTemplate;
     }
 
-    public void setHologramTemplate(@NotNull String hologramTemplate) {
-        this.hologramTemplate = hologramTemplate.toLowerCase();
+    public boolean isLifeTimeEnabled() {
+        return lifeTimeEnabled;
+    }
+
+    public int getDepositPrice() {
+        return depositPrice;
     }
 
     @NotNull
@@ -163,13 +174,18 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
     }
 
     @Nullable
-    public PlayerRankMap<Long> getLifeTime() {
+    public PlayerRankMap<Integer> getLifeTime() {
         return lifeTime;
     }
 
     @NotNull
     public List<RegionBreaker> getBreakers() {
         return breakers;
+    }
+
+    @NotNull
+    public String getCurrencyId() {
+        return currencyId;
     }
 
     public int getRegionSize() {
@@ -197,6 +213,37 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         return manager;
     }
 
+    public void setHologramInRegion(boolean hologramInRegion) {
+        this.hologramInRegion = hologramInRegion;
+    }
+
+    public void setHologramEnabled(boolean hologramEnabled) {
+        this.hologramEnabled = hologramEnabled;
+    }
+
+    public void setHologramTemplate(@NotNull String hologramTemplate) {
+        this.hologramTemplate = hologramTemplate.toLowerCase();
+    }
+
+    public void setLifeTimeEnabled(boolean lifeTimeEnabled) {
+        this.lifeTimeEnabled = lifeTimeEnabled;
+        if (lifeTimeEnabled) {
+            if (!this.getConfig().contains("Life_Time.Parameter")) {
+                new PlayerRankMap<>(Map.of(DEFAULT, 604800L))
+                        .write(this.getConfig(), "Life_Time.Parameter");
+            }
+            this.lifeTime = PlayerRankMap.readInt(cfg, "Life_Time.Parameter");
+        }
+    }
+
+    public void setDepositPrice(int depositPrice) {
+        this.depositPrice = depositPrice;
+    }
+
+    public void setCurrencyId(@NotNull String currencyId) {
+        this.currencyId = currencyId;
+    }
+
     public void setItem(@NotNull ItemStack item) {
         this.item = item;
     }
@@ -207,10 +254,6 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
 
     public void setStrength(int strength) {
         this.strength = strength;
-    }
-
-    public void setLifeTime(@NotNull PlayerRankMap<Long> lifeTime) {
-        this.lifeTime = lifeTime;
     }
 
     public void setRegionSize(int regionSize) {

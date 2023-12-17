@@ -48,6 +48,15 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
             .current("Strength", Placeholders.REGION_BLOCK_STRENGTH + GRAY + " (" + WHITE + LMB + GRAY + ")")
             .build();
 
+    public static final EditorLocale REGION_BLOCK_DEPOSIT = builder(PREFIX + "Region.Block.Change.Deposit")
+            .name("Region Deposit")
+            .text("Sets the sum of the extension of the block's life", "Sets the currency for payment")
+            .emptyLine()
+            .currentHeader()
+            .current("Price", Placeholders.REGION_BLOCK_DEPOSIT_PRICE + GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .current("Currency", Placeholders.REGION_BLOCK_DEPOSIT_CURRENCY + GRAY + " (" + WHITE + RMB + GRAY + ")")
+            .build();
+
     public static final EditorLocale REGION_HOLOGRAM = builder(PREFIX + "Region.Block.Change.Hologram")
             .name("Hologram")
             .text("Creates hologram above block",
@@ -76,6 +85,8 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
                     "",
                     RED + "You can only change it in the " + BOLD + "config.yml" + RED + " file"
             )
+            .currentHeader()
+            .current("Enabled", Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
             .build();
     public static final EditorLocale REGION_BLOCK_BREAKERS_ICON = builder(PREFIX + "Region.Block.Breakers.Navigate")
             .name("Region Breakers")

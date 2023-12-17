@@ -1,14 +1,19 @@
 package t.me.p1azmer.plugin.protectionblocks.region.listener;
 
+import io.papermc.paper.event.block.PlayerShearBlockEvent;
+import io.papermc.paper.event.player.*;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import t.me.p1azmer.engine.api.manager.AbstractListener;
@@ -16,9 +21,10 @@ import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.events.BlockBreakRegionEvent;
 import t.me.p1azmer.plugin.protectionblocks.api.events.PlayerEnterRegionEvent;
 import t.me.p1azmer.plugin.protectionblocks.api.events.PlayerExitRegionEvent;
+import t.me.p1azmer.plugin.protectionblocks.api.events.PlayerInteractRegionBlockEvent;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
-import t.me.p1azmer.plugin.protectionblocks.region.Region;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,32 +40,39 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void updateRegionBlock(PlayerEnterRegionEvent event) {
         event.getRegion().ifPresent(region -> region.updateHologram(event.getPlayer(), true));
     }
-    @EventHandler
+
+    @EventHandler(priority = EventPriority.LOW)
     public void updateRegionBlock(PlayerExitRegionEvent event) {
         event.getRegion().ifPresent(region -> region.updateHologram(event.getPlayer(), false));
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOW)
     public void detectRegions(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        Region region = this.manager.getRegionByLocation(event.getTo());
-        Region currentRegion = this.playerRegionMap.get(player);
-        if (this.playerRegionMap.containsKey(player) && (region == null || !region.equals(currentRegion))) {
-            PlayerExitRegionEvent calledEvent = new PlayerExitRegionEvent(player, currentRegion);
+        Region from = this.playerRegionMap.get(player);
+        Region to = this.manager.getRegionByLocation(event.getTo());
+
+        if (to != null && to.isExpired()) {
+            this.manager.deleteRegion(to, true);
+            return;
+        }
+
+        if (this.playerRegionMap.containsKey(player) && (to == null || !to.equals(from))) {
+            PlayerExitRegionEvent calledEvent = new PlayerExitRegionEvent(player, from);
             this.plugin.getPluginManager().callEvent(calledEvent);
             if (!event.isCancelled()) {
                 this.playerRegionMap.remove(player);
             }
         }
-        if (region != null && !this.playerRegionMap.containsKey(player)) {
-            PlayerEnterRegionEvent calledEvent = new PlayerEnterRegionEvent(player, region);
+        if (to != null && !this.playerRegionMap.containsKey(player)) {
+            PlayerEnterRegionEvent calledEvent = new PlayerEnterRegionEvent(player, to);
             this.plugin.getPluginManager().callEvent(calledEvent);
             if (!event.isCancelled()) {
-                this.playerRegionMap.put(player, region);
+                this.playerRegionMap.put(player, to);
             }
         }
     }
@@ -69,12 +82,22 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
         if (event.getInteractionPoint() == null) return;
 
         Block block = event.getInteractionPoint().getBlock();
+        Block clickedBlock = event.getClickedBlock();
         Region region = this.manager.getRegionByBlock(block);
         if (region == null) return;
-        event.setCancelled(!region.isAllowed(event.getPlayer()));
+        if (region.isAllowed(event.getPlayer())) {
+            if (clickedBlock != null && region.getBlockLocation().equals(clickedBlock.getLocation())) {
+                PlayerInteractRegionBlockEvent calledEvent = new PlayerInteractRegionBlockEvent(event.getPlayer(), region);
+                this.plugin.getPluginManager().callEvent(calledEvent);
+                if (calledEvent.isCancelled()) return;
+
+                region.getRegionMenu().openNextTick(event.getPlayer(), 1);
+            }
+        } else
+            event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void onRegionBreak(BlockBreakRegionEvent event) {
         Player player = event.getPlayer();
         if (player == null) return;
@@ -82,7 +105,7 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
         Object tool = event.getBlockOrItem();
         Block block = event.getTargetBlock();
 
-        if (block.getType().isAir() || !block.getType().isBlock()){
+        if (block.getType().isAir()) {
             return;
         }
         Region region = this.manager.getRegionByBlock(block);
@@ -98,14 +121,9 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
 
 
         event.setCancelled(!this.manager.tryDestroyRegion(player, tool, block, damageType, region));
-        if (event.isCancelled()) {
-            this.plugin.getMessage(Lang.REGION_ERROR_BREAK)
-                    .replace(region.replacePlaceholders())
-                    .send(player);
-        }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onRegionEnter(PlayerEnterRegionEvent event) {
         event.getRegion().ifPresent(region ->
                 plugin.getMessage(Lang.REGION_ENTER_NOTIFY)
@@ -114,7 +132,7 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
         );
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onRegionLeave(PlayerExitRegionEvent event) {
         event.getRegion().ifPresent(region ->
                 plugin.getMessage(Lang.REGION_EXIT_NOTIFY)
@@ -123,34 +141,47 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
         );
     }
 
-    // -=-=-=- prevent smelting protection blocks -=-=-=-
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInventoryClickEvent(InventoryClickEvent event) {
+        if (event.getInventory().getLocation() == null) return;
 
-//    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-//    public void onFurnaceSmelt(FurnaceSmeltEvent e) {
-//        // prevent protect block item to b  e smelt
-//        Region region = this.manager.getRegionByBlock(e.getBlock());
-//        if (region != null && region.isAllowed(e.get)) {
-//            e.setCancelled(true);
-//        }
-//    }
+        if (event.getInventory().getType() != InventoryType.CRAFTING
+                || event.getInventory().getType() != InventoryType.CREATIVE
+                || event.getInventory().getType() != InventoryType.ENCHANTING
+                || event.getInventory().getType() != InventoryType.ENDER_CHEST
+                || event.getInventory().getType() != InventoryType.WORKBENCH
+                || event.getInventory().getType() != InventoryType.PLAYER
+        ) {
+            Region region = this.manager.getRegionByLocation(event.getInventory().getLocation());
+            if (region == null) return;
 
-//    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-//    public void onFurnaceBurnItem(FurnaceBurnEvent e) {
-//        // prevent protect block item to be smelt
-//        Furnace f = (Furnace) e.getBlock().getState();
-//        if (f.getInventory().getSmelting() != null) {
-//            PSProtectBlock options = ProtectionStones.getBlockOptions(f.getInventory().getSmelting());
-//            PSProtectBlock fuelOptions = ProtectionStones.getBlockOptions(f.getInventory().getFuel());
-//            if ((options != null && !options.allowSmeltItem) || (fuelOptions != null && !fuelOptions.allowSmeltItem)) {
-//                e.setCancelled(true);
-//            }
-//        }
-//    }
+            if (!region.isAllowed(event.getWhoClicked().getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
 
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInventoryOpenEvent(InventoryOpenEvent event) {
+        if (event.getInventory().getLocation() == null) return;
 
-    // -=-=-=- block changes to protection block related events -=-=-=-
+        if (event.getInventory().getType() != InventoryType.CRAFTING
+                || event.getInventory().getType() != InventoryType.CREATIVE
+                || event.getInventory().getType() != InventoryType.ENCHANTING
+                || event.getInventory().getType() != InventoryType.ENDER_CHEST
+                || event.getInventory().getType() != InventoryType.WORKBENCH
+                || event.getInventory().getType() != InventoryType.PLAYER
+        ) {
+            Region region = this.manager.getRegionByLocation(event.getInventory().getLocation());
+            if (region == null) return;
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+            if (!region.isAllowed(event.getPlayer().getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerBucketFill(PlayerBucketEmptyEvent event) {
         Block clicked = event.getBlockClicked();
         BlockFace bf = event.getBlockFace();
@@ -161,7 +192,7 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW)
     public void onBlockIgnite(BlockIgniteEvent event) {
         if (event.getPlayer() == null) return;
 
@@ -169,5 +200,72 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
         if (region != null && !region.isAllowed(event.getPlayer())) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerOpenSignEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getSign().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerBucketFillEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getBlock().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerBucketEmptyEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getBlock().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerBucketEntityEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getEntity().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerLoomPatternSelectEvent event) {
+        if (event.getLoomInventory().getLocation() == null) return;
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getLoomInventory().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerItemFrameChangeEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getItemFrame().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerChangeBeaconEffectEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getBeacon().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerFlowerPotManipulateEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getFlowerpot().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerArmorStandManipulateEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getRightClicked().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerShearBlockEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getBlock().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerInteractAtEntityEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getRightClicked().getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onWorldInteractBlocked(PlayerHarvestBlockEvent event) {
+        event.setCancelled(this.handleInteract(event.getPlayer(), event.getHarvestedBlock().getLocation()));
+    }
+
+    public boolean handleInteract(@NotNull LivingEntity entity, @NotNull Location location) {
+        Region region = this.manager.getRegionByLocation(location);
+        if (region == null) return false;
+        return region.isAllowed(entity.getUniqueId());
     }
 }
