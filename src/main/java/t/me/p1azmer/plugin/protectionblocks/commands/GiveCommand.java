@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import t.me.p1azmer.engine.api.command.AbstractCommand;
 import t.me.p1azmer.engine.api.command.CommandResult;
 import t.me.p1azmer.engine.api.manager.AbstractConfigHolder;
-import t.me.p1azmer.engine.coins.Placeholders;
 import t.me.p1azmer.engine.utils.CollectionsUtil;
 import t.me.p1azmer.engine.utils.NumberUtil;
 import t.me.p1azmer.engine.utils.PlayerUtil;
 import t.me.p1azmer.plugin.protectionblocks.Perms;
+import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
@@ -67,7 +67,6 @@ public class GiveCommand extends AbstractCommand<ProtectionPlugin> {
         }
 
         PlayerUtil.addItem(player, regionBlock.getItem(), amount);
-
 
         plugin.getMessage(Lang.COMMAND_GIVE_DONE)
                 .replace(regionBlock.replacePlaceholders())
