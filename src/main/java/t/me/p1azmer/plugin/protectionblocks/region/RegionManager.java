@@ -277,42 +277,42 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
                                 .replace(regionBlock.replacePlaceholders()));
                     }
                     result.set(true);
-                } else {
-                    if (notify) {
-                        region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DAMAGED_SELF)
-                                .replace(region.replacePlaceholders()));
-                        if (player != null)
-                            plugin.getMessage(Lang.REGION_SUCCESS_DAMAGED_TARGET)
-                                    .replace(region.replacePlaceholders())
-                                    .send(player);
-                    }
                 }
+            }
+            if (notify) {
+                region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DAMAGED_SELF)
+                        .replace(region.replacePlaceholders()));
+                if (player != null)
+                    plugin.getMessage(Lang.REGION_SUCCESS_DAMAGED_TARGET)
+                            .replace(region.replacePlaceholders())
+                            .send(player);
             }
         });
         return result.get();
     }
 
-    public boolean tryDestroyRegion(@Nullable Player player, @Nullable Object blockOrItem, @NotNull Block targetBlock, @NotNull DamageType damageType, @NotNull Region region) {
-        boolean isMember = player != null && region.isAllowed(player);
+    public boolean tryDestroyRegion(@NotNull Player player, @Nullable Object blockOrItem, @NotNull Block targetBlock, @NotNull DamageType damageType, @NotNull Region region) {
+        boolean isMember = region.isAllowed(player);
 
         if (!isMember) {
             boolean allowed = this.tryDamageRegion(player, blockOrItem, targetBlock, region, damageType, true);
             if (!allowed) {
-                assert player != null;
                 this.plugin.getMessage(Lang.REGION_ERROR_BREAK)
                         .replace(region.replacePlaceholders())
                         .send(player);
             }
             return allowed;
-        } else if (region.isRegionBlock(targetBlock) && (!Config.REGION_BLOCK_BREAK_OWNER_ONLY.get() || region.getOwner().equals(player.getUniqueId()))) {
+        }
+        if (region.isRegionBlock(targetBlock) && (!Config.REGION_BLOCK_BREAK_OWNER_ONLY.get() || region.isOwner(player.getUniqueId()))) {
             this.deleteRegion(region, false);
 
             region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DESTROY_SELF)
                     .replace(region.replacePlaceholders()));
             targetBlock.breakNaturally(new ItemStack(Material.AIR));
             region.getRegionBlock().ifPresent(regionBlock -> targetBlock.getWorld().dropItem(targetBlock.getLocation(), regionBlock.getItem()));
+            return true;
         }
-        return true;
+        return !region.isRegionBlock(targetBlock);
     }
 
     public boolean tryBlockPlaceRegion(@NotNull Player player, @NotNull Region region) {

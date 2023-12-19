@@ -29,6 +29,9 @@ import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/*
+    TODO: add support for this https://github.com/IzzelAliz/Arclight
+ */
 public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     private final RegionManager manager;
     private final Map<Player, Region> playerRegionMap;
@@ -228,6 +231,6 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     public boolean handleInteract(@NotNull LivingEntity entity, @NotNull Location location) {
         Region region = this.manager.getRegionByLocation(location);
         if (region == null) return false;
-        return region.isAllowed(entity.getUniqueId());
+        return !region.isAllowed(entity.getUniqueId());
     }
 }
