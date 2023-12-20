@@ -1,5 +1,6 @@
 package t.me.p1azmer.plugin.protectionblocks.region.editor;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -18,6 +19,7 @@ import t.me.p1azmer.plugin.protectionblocks.editor.EditorLocales;
 import t.me.p1azmer.plugin.protectionblocks.region.editor.breakers.RGBlockBreakersListEditor;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RGBlockMainEditor extends EditorMenu<ProtectionPlugin, RegionBlock> {
@@ -58,28 +60,28 @@ public class RGBlockMainEditor extends EditorMenu<ProtectionPlugin, RegionBlock>
                     .writeMeta();
         }));
 
-        this.addItem(Material.NAME_TAG, EditorLocales.REGION_BLOCK_NAME, 11).setClick((viewer, event) ->
+        this.addItem(Material.NAME_TAG, EditorLocales.REGION_BLOCK_NAME, 10).setClick((viewer, event) ->
                 this.handleInput(viewer, Lang.Editor_Region_Block_Enter_Name, wrapper -> {
                     regionBlock.setName(wrapper.getText());
                     regionBlock.save();
                     return true;
                 }));
-        this.addItem(Material.MOSS_BLOCK, EditorLocales.REGION_BLOCK_SIZE, 13).setClick((viewer, event) ->
+        this.addItem(Material.MOSS_BLOCK, EditorLocales.REGION_BLOCK_SIZE, 12).setClick((viewer, event) ->
                 this.handleInput(viewer, Lang.Editor_Region_Block_Enter_Value, wrapper -> {
                     regionBlock.setRegionSize(wrapper.asInt(1));
                     regionBlock.save();
                     return true;
                 }));
         this.addItem(ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmQzNmMzMjkxZmUwMmQxNDJjNGFmMjhkZjJmNTViYjAzOTdlMTk4NTU0ZTgzNDU5OTBkYmJjZDRjMTQwMzE2YiJ9fX0="),
-                EditorLocales.REGION_BLOCK_STRENGTH, 15).setClick((viewer, event) ->
+                EditorLocales.REGION_BLOCK_STRENGTH, 14).setClick((viewer, event) ->
                 this.handleInput(viewer, Lang.Editor_Region_Block_Enter_Value, wrapper -> {
                     regionBlock.setStrength(wrapper.asInt(1));
                     regionBlock.save();
                     return true;
                 }));
-        this.addItem(Material.IRON_PICKAXE, EditorLocales.REGION_BLOCK_BREAKERS_ICON, 21).setClick((viewer, event) -> this.plugin.runTask(task -> this.getEditorBreakers().open(viewer.getPlayer(), 1)));
+        this.addItem(Material.IRON_PICKAXE, EditorLocales.REGION_BLOCK_BREAKERS_ICON, 16).setClick((viewer, event) -> this.plugin.runTask(task -> this.getEditorBreakers().open(viewer.getPlayer(), 1)));
 
-        this.addItem(Material.ARMOR_STAND, EditorLocales.REGION_HOLOGRAM, 23).setClick((viewer, event) -> {
+        this.addItem(Material.ARMOR_STAND, EditorLocales.REGION_HOLOGRAM, 20).setClick((viewer, event) -> {
             if (event.getClick().equals(ClickType.DROP)) {
                 regionBlock.setHologramInRegion(!regionBlock.isHologramInRegion());
                 regionBlock.getManager().getRegionsWithBlocks(regionBlock).forEach(regionBlock::updateHologram);
@@ -100,7 +102,7 @@ public class RGBlockMainEditor extends EditorMenu<ProtectionPlugin, RegionBlock>
             }
         });
         this.addItem(ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjg4OWNmY2JhY2JlNTk4ZThhMWNkODYxMGI0OWZjYjYyNjQ0ZThjYmE5ZDQ5MTFkMTIxMTM0NTA2ZDhlYTFiNyJ9fX0="),
-                        EditorLocales.REGION_BLOCK_DEPOSIT, 31)
+                        EditorLocales.REGION_BLOCK_DEPOSIT, 22)
                 .setClick((viewer, event) -> {
                     if (event.isLeftClick()) {
                         this.handleInput(viewer, Lang.Editor_Region_Block_Enter_Value, wrapper -> {
@@ -122,6 +124,26 @@ public class RGBlockMainEditor extends EditorMenu<ProtectionPlugin, RegionBlock>
                         EditorManager.suggestValues(viewer.getPlayer(), plugin().getCurrencyManager().getCurrencyIds(), true);
                     }
                 });
+        this.addItem(ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjgwZDMyOTVkM2Q5YWJkNjI3NzZhYmNiOGRhNzU2ZjI5OGE1NDVmZWU5NDk4YzRmNjlhMWMyYzc4NTI0YzgyNCJ9fX0="),
+                EditorLocales.REGION_BLOCK_WORLDS, 24).setClick((viewer, event) -> {
+            if (event.isShiftClick()) {
+                if (event.isRightClick()) {
+                    regionBlock.setWorlds(new ArrayList<>());
+                    this.save(viewer);
+                }
+            } else {
+                if (event.isLeftClick()) {
+                    EditorManager.suggestValues(viewer.getPlayer(), CollectionsUtil.worldNames(), true);
+                    this.handleInput(viewer, Lang.Editor_Region_Block_Enter_World, wrapper -> {
+                        List<String> list = regionBlock.getWorlds();
+                        list.add(wrapper.getText());
+                        regionBlock.setWorlds(list);
+                        regionBlock.save();
+                        return true;
+                    });
+                }
+            }
+        });
         this.addItem(ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTRiZDlhNDViOTY4MWNlYTViMjhjNzBmNzVhNjk1NmIxZjU5NGZlYzg0MGI5NjA3Nzk4ZmIxZTcwNzc2NDQzMCJ9fX0="),
                         EditorLocales.REGION_BLOCK_LIFE_TIME, 39)
                 .setClick((viewer, event) -> {

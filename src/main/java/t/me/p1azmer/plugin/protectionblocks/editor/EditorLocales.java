@@ -64,9 +64,9 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
                     GRAY + "Example:",
                     GRAY + "You can disable hologram and create 'invisible' region",
                     "",
-                    GRAY+"If set to "+LIGHT_YELLOW+"In Region"+GRAY+",",
-                    GRAY+"the region hologram will only be displayed",
-                    GRAY+"when the player is in the region")
+                    GRAY + "If set to " + LIGHT_YELLOW + "In Region" + GRAY + ",",
+                    GRAY + "the region hologram will only be displayed",
+                    GRAY + "when the player is in the region")
             .emptyLine()
             .currentHeader()
             .current("In Region Only", Placeholders.REGION_BLOCK_HOLOGRAM_IN_REGION + GRAY + " (" + WHITE + DROP_KEY + GRAY + ")")
@@ -86,7 +86,7 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
                     RED + "You can only change it in the " + BOLD + "config.yml" + RED + " file"
             )
             .currentHeader()
-            .current("Enabled", Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .current("Enabled", Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED + GRAY + " (" + WHITE + LMB + GRAY + ")")
             .build();
     public static final EditorLocale REGION_BLOCK_PLACE_LIMIT = builder(PREFIX + "Region.Block.Change.Place_Limit")
             .name("Region Place Limit")
@@ -98,7 +98,7 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
                     RED + "You can only change it in the " + BOLD + "config.yml" + RED + " file"
             )
             .currentHeader()
-            .current("Enabled", Placeholders.REGION_BLOCK_PLACE_LIMIT_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .current("Enabled", Placeholders.REGION_BLOCK_PLACE_LIMIT_ENABLED + GRAY + " (" + WHITE + LMB + GRAY + ")")
             .build();
     public static final EditorLocale REGION_BLOCK_GROUP_SIZE = builder(PREFIX + "Region.Block.Change.Group_Size")
             .name("Region Groups Size")
@@ -109,7 +109,19 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
                     RED + "You can only change it in the " + BOLD + "config.yml" + RED + " file"
             )
             .currentHeader()
-            .current("Enabled", Placeholders.REGION_BLOCK_GROUP_SIZE_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .current("Enabled", Placeholders.REGION_BLOCK_GROUP_SIZE_ENABLED + GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .build();
+
+    public static final EditorLocale REGION_BLOCK_WORLDS = builder(PREFIX + "Region.Block.Change.Worlds")
+            .name("Region Worlds")
+            .text("List of worlds where this",
+                    "region block will be available")
+            .emptyLine()
+            .currentHeader()
+            .current("List", Placeholders.REGION_BLOCK_WORLDS)
+            .emptyLine()
+            .click(LMB, "Add world")
+            .click(SHIFT_RMB, "Clear")
             .build();
     public static final EditorLocale REGION_BLOCK_BREAKERS_ICON = builder(PREFIX + "Region.Block.Breakers.Navigate")
             .name("Region Breakers")
@@ -120,7 +132,7 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
     public static final EditorLocale REGION_BLOCK_BREAKERS_CREATE = builder(PREFIX + "Region.Block.Breakers.Create")
             .name("New Breaker")
             .emptyLine()
-            .text(GREEN + "Note" + GRAY + ":", "If you added TNT,","it means that the block can be","broken with a TNT blast")
+            .text(GREEN + "Note" + GRAY + ":", "If you added TNT,", "it means that the block can be", "broken with a TNT blast")
             .emptyLine()
             .click(DRAG_DROP, "Add")
             .build();

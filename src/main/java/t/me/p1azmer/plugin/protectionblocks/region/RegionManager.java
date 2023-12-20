@@ -172,6 +172,7 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     public void tryCreateRegion(@NotNull Player player, @NotNull Block block, @NotNull ItemStack item, @NotNull RegionBlock regionBlock) {
         Region region = this.getRegionByBlock(block);
         if (region != null && !region.isAllowed(player)) return;
+        if (!regionBlock.getWorlds().contains(block.getWorld().getName())) return;
 
         if (regionBlock.isPlaceLimitEnabled() && regionBlock.getPlaceLimit() != null) {
             RegionUser regionUser = plugin.getUserManager().getUserData(player);

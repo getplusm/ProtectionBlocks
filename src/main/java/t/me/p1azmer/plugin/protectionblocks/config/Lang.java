@@ -41,6 +41,7 @@ public class Lang extends EngineLang {
     public static final LangKey MENU_MEMBERS_KICK_SUCCESS = LangKey.of("Messages.Menu.Members.Kick.Success", GREEN + "Member " + LIGHT_YELLOW + Placeholders.MEMBER_NAME + GREEN + " success removed from region!");
 
     public static final LangKey Editor_Region_Block_Enter_Create = new LangKey("Editor.Region.Block.Enter.Create", GRAY + "Enter " + GREEN + "unique " + GRAY + "block " + GREEN + "identifier" + GRAY + "...");
+    public static final LangKey Editor_Region_Block_Enter_World = new LangKey("Editor.Region.Block.Enter.World", GRAY + "Enter " + GREEN + "world name" + GRAY + "...");
     public static final LangKey Editor_Region_Block_Enter_Name = new LangKey("Editor.Region.Block.Enter.Name", GRAY + "Enter " + GREEN + "name" + GRAY + "...");
     public static final LangKey Editor_Region_Enter_Player_name = new LangKey("Editor.Region.Enter.Player_Name", GRAY + "Enter " + GREEN + "player name" + GRAY + "...");
     public static final LangKey Editor_Region_Block_Enter_Currency = new LangKey("Editor.Region.Block.Enter.Currency", GRAY + "Enter " + GREEN + "currency" + GRAY + "...");

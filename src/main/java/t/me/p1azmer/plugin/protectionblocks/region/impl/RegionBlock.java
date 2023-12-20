@@ -9,6 +9,7 @@ import t.me.p1azmer.engine.api.placeholder.IPlaceholderMap;
 import t.me.p1azmer.engine.api.placeholder.PlaceholderMap;
 import t.me.p1azmer.engine.lang.LangManager;
 import t.me.p1azmer.engine.utils.Colorizer;
+import t.me.p1azmer.engine.utils.Colors;
 import t.me.p1azmer.engine.utils.PlayerRankMap;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
@@ -35,6 +36,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
     private PlayerRankMap<Integer> placeLimit;
     private int regionSize;
     private List<RegionBreaker> breakers;
+    private List<String> worlds;
     private boolean hologramEnabled;
     private boolean hologramInRegion;
     private String hologramTemplate;
@@ -52,6 +54,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         this.manager = manager;
 
         this.breakers = new ArrayList<>();
+        this.worlds = List.of("world");
 
         this.placeholderMap = new PlaceholderMap()
                 .add(Placeholders.REGION_BLOCK_ID, this::getId)
@@ -66,6 +69,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_ENABLED, () -> LangManager.getBoolean(this.isHologramEnabled()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_IN_REGION, () -> LangManager.getBoolean(this.isHologramInRegion()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_TEMPLATE, this::getHologramTemplate)
+                .add(Placeholders.REGION_BLOCK_WORLDS, ()-> Colorizer.apply(Colors.LIGHT_PURPLE + String.join(", ", this.getWorlds())))
         ;
     }
 
@@ -102,6 +106,10 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
             this.getBreakers().add(RegionBreaker.read(cfg, "Region.Breakers.List." + sId));
         }
         this.setCurrencyId(cfg.getString("Region.Deposit.Currency_Id", "Vault"));
+
+        if (!cfg.contains("Worlds") && cfg.getStringList("Worlds").isEmpty())
+            cfg.set("Worlds", List.of("world"));
+        this.setWorlds(cfg.getStringList("Worlds"));
         return true;
     }
 
@@ -133,6 +141,8 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         for (RegionBreaker breaker : this.getBreakers()){
             breaker.write(cfg, "Region.Breakers.List."+ (i++));
         }
+
+        cfg.set("Worlds", this.getWorlds());
     }
 
     public void clear() {
@@ -226,6 +236,15 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
     @NotNull
     public List<RegionBreaker> getBreakers() {
         return breakers;
+    }
+
+    @NotNull
+    public List<String> getWorlds() {
+        return worlds;
+    }
+
+    public void setWorlds(@NotNull List<String> worlds) {
+        this.worlds = worlds;
     }
 
     @NotNull
