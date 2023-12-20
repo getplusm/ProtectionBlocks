@@ -25,7 +25,7 @@ public class ItemStackHandler implements CurrencyHandler {
 
     @Override
     public double getBalance(@NotNull Player player) {
-        return Math.floor(PlayerUtil.countItem(player, this.getItem()));
+        return PlayerUtil.countItem(player, this.getItem());
     }
 
     @Override

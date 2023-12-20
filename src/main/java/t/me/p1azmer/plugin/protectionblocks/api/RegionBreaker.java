@@ -1,8 +1,6 @@
 package t.me.p1azmer.plugin.protectionblocks.api;
 
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,10 +31,6 @@ public class RegionBreaker implements IPlaceholderMap {
             return RegionManager.DamageType.EXPLODE;
         if (material.isItem())
             return RegionManager.DamageType.TOOLS;
-        if (material.isBlock())
-            return RegionManager.DamageType.BLOCK_PLACE;
-        if (material.isCollidable())
-            return RegionManager.DamageType.FALLING_BLOCK;
         return RegionManager.DamageType.HAND;
     }
 
@@ -45,7 +39,7 @@ public class RegionBreaker implements IPlaceholderMap {
         if (item == null)
             item = new ItemStack(Material.BARRIER);
         RegionManager.DamageType damageType = cfg.getEnum(path + ".Damage_Type", RegionManager.DamageType.class, RegionManager.DamageType.HAND);
-        return new RegionBreaker( item, damageType);
+        return new RegionBreaker(item, damageType);
     }
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
@@ -66,20 +60,8 @@ public class RegionBreaker implements IPlaceholderMap {
                     }
                     return false;
                 }
-                case BLOCK_PLACE -> {
-                    if (blockOrItem == null) return false;
-                    if (blockOrItem instanceof Block block && block.getType().isBlock()) {
-                        return this.getItem().getType().equals(block.getType());
-                    }
-                }
-                case FALLING_BLOCK -> {
-                    if (blockOrItem == null) return false;
-                    if (blockOrItem instanceof FallingBlock fallingBlock) {
-                        return fallingBlock.getBlockState().getType().equals(this.getItem().getType());
-                    }
-                }
                 case EXPLODE -> {
-                    return this.getItem().getType().equals(Material.TNT) || this.getItem().getType().equals(Material.TNT_MINECART);
+                    return this.getItem().getType().equals(Material.TNT) || this.getItem().getType().equals(Material.TNT_MINECART) || this.getItem().getType().equals(Material.CREEPER_SPAWN_EGG);
                 }
             }
         }

@@ -88,6 +88,29 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
             .currentHeader()
             .current("Enabled", Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
             .build();
+    public static final EditorLocale REGION_BLOCK_PLACE_LIMIT = builder(PREFIX + "Region.Block.Change.Place_Limit")
+            .name("Region Place Limit")
+            .text(
+                    "You can set a group limit to place this block.",
+                    "If a player reaches the limit,",
+                    "he will not be able to create a region of this block",
+                    "",
+                    RED + "You can only change it in the " + BOLD + "config.yml" + RED + " file"
+            )
+            .currentHeader()
+            .current("Enabled", Placeholders.REGION_BLOCK_PLACE_LIMIT_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .build();
+    public static final EditorLocale REGION_BLOCK_GROUP_SIZE = builder(PREFIX + "Region.Block.Change.Group_Size")
+            .name("Region Groups Size")
+            .text(
+                    "You can set the region size",
+                    "to individual for per group",
+                    "",
+                    RED + "You can only change it in the " + BOLD + "config.yml" + RED + " file"
+            )
+            .currentHeader()
+            .current("Enabled", Placeholders.REGION_BLOCK_GROUP_SIZE_ENABLED+ GRAY + " (" + WHITE + LMB + GRAY + ")")
+            .build();
     public static final EditorLocale REGION_BLOCK_BREAKERS_ICON = builder(PREFIX + "Region.Block.Breakers.Navigate")
             .name("Region Breakers")
             .text(YELLOW + "Breakers " + GRAY + "-" + LIGHT_YELLOW + " items that can destroy a this block")

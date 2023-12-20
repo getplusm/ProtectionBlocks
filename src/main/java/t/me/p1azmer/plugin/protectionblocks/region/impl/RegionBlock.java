@@ -29,8 +29,10 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
     private ItemStack item;
     private String name;
     private int strength;
-    private boolean lifeTimeEnabled;
+    private boolean lifeTimeEnabled, placeLimitEnabled, groupSizeEnabled;
+    private PlayerRankMap<Integer> groupSize;
     private PlayerRankMap<Integer> lifeTime;
+    private PlayerRankMap<Integer> placeLimit;
     private int regionSize;
     private List<RegionBreaker> breakers;
     private boolean hologramEnabled;
@@ -59,6 +61,8 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
                 .add(Placeholders.REGION_BLOCK_DEPOSIT_PRICE, ()-> String.valueOf(this.getDepositPrice()))
                 .add(Placeholders.REGION_BLOCK_DEPOSIT_CURRENCY, this::getCurrencyId)
                 .add(Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED, () -> LangManager.getBoolean(this.isLifeTimeEnabled()))
+                .add(Placeholders.REGION_BLOCK_PLACE_LIMIT_ENABLED, () -> LangManager.getBoolean(this.isPlaceLimitEnabled()))
+                .add(Placeholders.REGION_BLOCK_GROUP_SIZE_ENABLED, () -> LangManager.getBoolean(this.isGroupSizeEnabled()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_ENABLED, () -> LangManager.getBoolean(this.isHologramEnabled()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_IN_REGION, () -> LangManager.getBoolean(this.isHologramInRegion()))
                 .add(Placeholders.REGION_BLOCK_HOLOGRAM_TEMPLATE, this::getHologramTemplate)
@@ -74,9 +78,24 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         this.setLifeTimeEnabled(cfg.getBoolean("Life_Time.Enabled"));
         if (cfg.contains("Life_Time.Parameter") && this.isLifeTimeEnabled())
             this.lifeTime = PlayerRankMap.readInt(cfg, "Life_Time.Parameter");
+        this.setPlaceLimitEnabled(cfg.getBoolean("Limits.Place.Enabled", false));
+        if (cfg.contains("Limits.Place.Groups")){
+            this.placeLimit = PlayerRankMap.readInt(cfg, "Limits.Place.Groups");
+        }
         this.item = cfg.getItemEncoded("Item");
         this.setDepositPrice(cfg.getInt("Region.Deposit.Price", 100));
-        this.regionSize = cfg.getInt("Region.Size", 5);
+        // old merge
+        int oldSize = cfg.getInt("Region.Size", 5);
+        if (cfg.getInt("Region.Size", -1) >= 0){
+            cfg.remove("Region.Size");
+        }
+
+        this.regionSize = cfg.getInt("Region.Size.Default", oldSize);
+        this.setGroupSizeEnabled(cfg.getBoolean("Region.Size.Group.Enabled", false));
+        if (cfg.contains("Region.Size.Group.List")){
+            this.groupSize = PlayerRankMap.readInt(cfg, "Region.Size.Group.List");
+        }
+
         this.strength = cfg.getInt("Region.Strength", 1);
 
         for (String sId : cfg.getSection("Region.Breakers.List")) {
@@ -95,9 +114,17 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         if (this.getLifeTime() != null)
             this.getLifeTime().write(cfg, "Life_Time.Parameter");
         cfg.set("Life_Time.Enabled", this.isLifeTimeEnabled());
+        cfg.set("Limits.Place.Enabled", this.isPlaceLimitEnabled());
+        if (this.getPlaceLimit() != null){
+            this.getPlaceLimit().write(cfg, "Limits.Place.Groups");
+        }
         cfg.setItemEncoded("Item", this.getItem());
         cfg.set("Name", this.getName());
-        cfg.set("Region.Size", this.getRegionSize());
+        cfg.set("Region.Size.Default", this.getRegionSize());
+        cfg.set("Region.Size.Group.Enabled", this.isGroupSizeEnabled());
+        if (this.getGroupSize() != null){
+            this.getGroupSize().write(cfg, "Region.Size.Group.List");
+        }
         cfg.set("Region.Deposit.Price", this.getDepositPrice());
         cfg.set("Region.Deposit.Currency_Id", this.getCurrencyId());
         cfg.set("Region.Strength", this.getStrength());
@@ -159,6 +186,14 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         return lifeTimeEnabled;
     }
 
+    public boolean isPlaceLimitEnabled() {
+        return placeLimitEnabled;
+    }
+
+    public boolean isGroupSizeEnabled() {
+        return groupSizeEnabled;
+    }
+
     public int getDepositPrice() {
         return depositPrice;
     }
@@ -176,6 +211,16 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
     @Nullable
     public PlayerRankMap<Integer> getLifeTime() {
         return lifeTime;
+    }
+
+    @Nullable
+    public PlayerRankMap<Integer> getPlaceLimit() {
+        return placeLimit;
+    }
+
+    @Nullable
+    public PlayerRankMap<Integer> getGroupSize() {
+        return groupSize;
     }
 
     @NotNull
@@ -233,6 +278,28 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
                         .write(this.getConfig(), "Life_Time.Parameter");
             }
             this.lifeTime = PlayerRankMap.readInt(cfg, "Life_Time.Parameter");
+        }
+    }
+
+    public void setPlaceLimitEnabled(boolean placeLimitEnabled) {
+        this.placeLimitEnabled = placeLimitEnabled;
+        if (placeLimitEnabled) {
+            if (!this.getConfig().contains("Limits.Place.Groups")) {
+                new PlayerRankMap<>(Map.of(DEFAULT, 3))
+                        .write(this.getConfig(), "Limits.Place.Groups");
+            }
+            this.placeLimit = PlayerRankMap.readInt(cfg, "Limits.Place.Groups");
+        }
+    }
+
+    public void setGroupSizeEnabled(boolean groupSizeEnabled) {
+        this.groupSizeEnabled = groupSizeEnabled;
+        if (groupSizeEnabled) {
+            if (!this.getConfig().contains("Region.Size.Group.List")) {
+                new PlayerRankMap<>(Map.of(DEFAULT, 3))
+                        .write(this.getConfig(), "Region.Size.Group.List");
+            }
+            this.groupSize = PlayerRankMap.readInt(cfg, "Region.Size.Group.List");
         }
     }
 

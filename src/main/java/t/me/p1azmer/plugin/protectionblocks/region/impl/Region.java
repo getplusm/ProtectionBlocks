@@ -12,10 +12,9 @@ import t.me.p1azmer.engine.api.lang.LangMessage;
 import t.me.p1azmer.engine.api.manager.AbstractConfigHolder;
 import t.me.p1azmer.engine.api.placeholder.IPlaceholderMap;
 import t.me.p1azmer.engine.api.placeholder.PlaceholderMap;
+import t.me.p1azmer.engine.integration.external.LuckpermsHook;
 import t.me.p1azmer.engine.lang.LangManager;
-import t.me.p1azmer.engine.utils.Colorizer;
-import t.me.p1azmer.engine.utils.NumberUtil;
-import t.me.p1azmer.engine.utils.TimeUtil;
+import t.me.p1azmer.engine.utils.*;
 import t.me.p1azmer.plugin.protectionblocks.Keys;
 import t.me.p1azmer.plugin.protectionblocks.Perms;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
@@ -42,6 +41,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
     private final RegionManager manager;
     private RegionBlock regionBlock;
     private int blockHealth;
+    private int regionSize;
 
     // cache
     private RegionMenu regionMenu;
@@ -57,6 +57,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
                 .add(Placeholders.REGION_ID, this::getId)
                 .add(Placeholders.REGION_OWNER_NAME, () -> Colorizer.apply(this.getOwnerName()))
                 .add(Placeholders.REGION_HEALTH, () -> String.valueOf(this.getBlockHealth()))
+                .add(Placeholders.REGION_SIZE, () -> String.valueOf(this.getBlockHealth()))
                 .add(Placeholders.REGION_MEMBERS_AMOUNT, () -> NumberUtil.format(this.getMembers().size()))
                 .add(Placeholders.REGION_EXPIRE_IN, () -> this.getLastDeposit() == -1 ? Colorizer.apply(Config.UNBREAKABLE.get()) : TimeUtil.formatTimeLeft(this.getLastDeposit()))
                 .add(Placeholders.REGION_CREATION_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getCreateTime()))
@@ -85,6 +86,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         this.createTime = this.cfg.getLong("Time.Create");
         this.lastDeposit = this.cfg.getLong("Time.Last_Deposit");
         this.blockHealth = this.cfg.getInt("Cache.Health", 1);
+        this.regionSize = this.cfg.getInt("Cache.Region.Size", 1); // visible settings
         for (String sId : cfg.getSection("Members.List")) {
             this.getMembers().add(RegionMember.read(this.cfg, "Members.List." + sId));
         }
@@ -102,6 +104,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         cfg.set("Time.Create", this.getCreateTime());
         cfg.set("Time.Last_Deposit", this.getLastDeposit());
         cfg.set("Cache.Health", this.getBlockHealth());
+        cfg.set("Cache.Region.Size", this.getRegionSize());
         cfg.set("Owner_Name", this.getOwnerName());
         int i = 0;
         for (RegionMember member : this.getMembers()) {
@@ -241,6 +244,14 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         if (this.blockHealth < 0) this.blockHealth = 0;
     }
 
+    public int getRegionSize() {
+        return regionSize;
+    }
+
+    public void setRegionSize(int regionSize) {
+        this.regionSize = regionSize;
+    }
+
     @NotNull
     public Optional<RegionBlock> getRegionBlock() {
         if (this.regionBlock == null)
@@ -253,25 +264,26 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements IP
         return this.placeholderMap;
     }
 
-    public void setBlockLocation(@NotNull Location location) {
+    public void setBlockLocation(@NotNull Location location, @NotNull RegionBlock regionBlock, @NotNull Player player) {
         this.blockLocation = location;
-        this.getRegionBlock().ifPresent(regionBlock -> {
 
-            Location lowerLocation = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
-            Location upperLocation = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-            lowerLocation.subtract(regionBlock.getRegionSize(), regionBlock.getRegionSize(), regionBlock.getRegionSize());
-            upperLocation.add(regionBlock.getRegionSize(), regionBlock.getRegionSize(), regionBlock.getRegionSize());
+        int size = regionBlock.isGroupSizeEnabled() && regionBlock.getGroupSize() != null ? regionBlock.getGroupSize().getBestValue(player, regionBlock.getRegionSize()) : regionBlock.getRegionSize();
+        Location lowerLocation = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        Location upperLocation = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-            if (lowerLocation.getY() > upperLocation.getY()) {
-                double temp = lowerLocation.getY();
-                lowerLocation.setY(upperLocation.getY());
-                upperLocation.setY(temp);
-            }
+        lowerLocation.subtract(size, size, size);
+        upperLocation.add(size, size, size);
 
-            Cuboid cuboid = new Cuboid(lowerLocation, upperLocation);
-            this.setCuboid(cuboid);
-        });
+        if (lowerLocation.getY() > upperLocation.getY()) {
+            double temp = lowerLocation.getY();
+            lowerLocation.setY(upperLocation.getY());
+            upperLocation.setY(temp);
+        }
+
+        Cuboid cuboid = new Cuboid(lowerLocation, upperLocation);
+        this.setCuboid(cuboid);
+        this.setRegionSize(size);
     }
 
     public void setCuboid(@NotNull Cuboid cuboid) {

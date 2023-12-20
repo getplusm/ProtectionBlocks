@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import t.me.p1azmer.engine.NexPlugin;
 import t.me.p1azmer.engine.api.command.GeneralCommand;
+import t.me.p1azmer.engine.api.data.UserDataHolder;
 import t.me.p1azmer.engine.command.list.ReloadSubCommand;
 import t.me.p1azmer.engine.utils.EngineUtils;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
@@ -12,12 +13,19 @@ import t.me.p1azmer.plugin.protectionblocks.commands.GiveCommand;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
 import t.me.p1azmer.plugin.protectionblocks.currency.CurrencyManager;
+import t.me.p1azmer.plugin.protectionblocks.data.DataHandler;
+import t.me.p1azmer.plugin.protectionblocks.data.UserManager;
+import t.me.p1azmer.plugin.protectionblocks.data.impl.RegionUser;
 import t.me.p1azmer.plugin.protectionblocks.editor.EditorLocales;
 import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramDecentHandler;
 import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramDisplaysHandler;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
 
-public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> {
+public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements UserDataHolder<ProtectionPlugin, RegionUser> {
+    private DataHandler userData;
+    private UserManager userManager;
+
+
     private RegionManager regionManager;
     private HologramHandler hologramHandler;
     private CurrencyManager currencyManager;
@@ -101,6 +109,28 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> {
     @Override
     public void registerPermissions() {
         this.registerPermissions(Perms.class);
+    }
+
+    @Override
+    public boolean setupDataHandlers() {
+        this.userData = DataHandler.getInstance(this);
+        this.userData.setup();
+
+        this.userManager = new UserManager(this);
+        this.userManager.setup();
+        return true;
+    }
+
+    @Override
+    @NotNull
+    public DataHandler getData() {
+        return this.userData;
+    }
+
+    @NotNull
+    @Override
+    public UserManager getUserManager() {
+        return userManager;
     }
 
     @NotNull

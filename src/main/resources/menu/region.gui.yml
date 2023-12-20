@@ -19,7 +19,7 @@ Content:
   members:
     Item:
       Material: PLAYER_HEAD
-      Head_Texture:
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzZjYmFlNzI0NmNjMmM2ZTg4ODU4NzE5OGM3OTU5OTc5NjY2YjRmNWE0MDg4ZjI0ZTI2ZTA3NWYxNDBhZTZjMyJ9fX0=
       Name: '#ee9aff&lMembers'
       Lore:
         - '#ee9aff▪ #ddeceeTotal: #ee9aff%region_members_amount%'
@@ -53,7 +53,7 @@ Content:
     Item:
       Material: PLAYER_HEAD
       Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDAxYWZlOTczYzU0ODJmZGM3MWU2YWExMDY5ODgzM2M3OWM0MzdmMjEzMDhlYTlhMWEwOTU3NDZlYzI3NGEwZiJ9fX0=
-      Name: '%region_block_name% &6%region_block_size%x%region_block_size%'
+      Name: '%region_block_name% &6%region_size%x%region_size%'
       Lore:
         - '#ee9aff&lInfo:'
         - '#ee9aff▪ #ddeceeExpire: #ee9aff%region_expire_in%'

@@ -4,21 +4,21 @@ public class Placeholders extends t.me.p1azmer.engine.utils.Placeholders {
     public static final String WIKI_URL = "https://github.com/getplusm/ProtectionBlocks/wiki/";
     public static final String WIKI_PLACEHOLDERS = "https://github.com/getplusm/ProtectionBlocks/wiki/Internal-Placeholders";
 
-    public static final String GENERIC_NAME     = "%name%";
-    public static final String GENERIC_ITEM     = "%item%";
-    public static final String GENERIC_TOTAL    = "%total%";
-    public static final String GENERIC_LORE     = "%lore%";
-    public static final String GENERIC_AMOUNT   = "%amount%";
-    public static final String GENERIC_UNITS    = "%units%";
-    public static final String GENERIC_TYPE     = "%type%";
-    public static final String GENERIC_TIME     = "%time%";
-    public static final String GENERIC_PRICE    = "%price%";
-    public static final String GENERIC_BALANCE  = "%balance%";
+    public static final String GENERIC_NAME = "%name%";
+    public static final String GENERIC_ITEM = "%item%";
+    public static final String GENERIC_TOTAL = "%total%";
+    public static final String GENERIC_LORE = "%lore%";
+    public static final String GENERIC_AMOUNT = "%amount%";
+    public static final String GENERIC_UNITS = "%units%";
+    public static final String GENERIC_TYPE = "%type%";
+    public static final String GENERIC_TIME = "%time%";
+    public static final String GENERIC_PRICE = "%price%";
+    public static final String GENERIC_BALANCE = "%balance%";
 
     // currency
 
     public static final String CURRENCY_NAME = "%currency_name%";
-    public static final String CURRENCY_ID   = "%currency_id%";
+    public static final String CURRENCY_ID = "%currency_id%";
 
     // region
     public static final String REGION_ID = "%region_id%";
@@ -28,6 +28,7 @@ public class Placeholders extends t.me.p1azmer.engine.utils.Placeholders {
     public static final String REGION_MEMBERS_AMOUNT = "%region_members_amount%";
     public static final String REGION_EXPIRE_IN = "%region_expire_in%";
     public static final String REGION_CREATION_TIME = "%region_creation_time%";
+    public static final String REGION_SIZE = "%region_size%";
 
     // members
     public static final String MEMBER_JOIN_TIME = "%member_join_time%";
@@ -40,7 +41,9 @@ public class Placeholders extends t.me.p1azmer.engine.utils.Placeholders {
     public static final String REGION_BLOCK_STRENGTH = "%region_block_strength%";
     public static final String REGION_BLOCK_DEPOSIT_PRICE = "%region_block_deposit_price%";
     public static final String REGION_BLOCK_DEPOSIT_CURRENCY = "%region_block_deposit_currency%";
-    public static final String REGION_BLOCK_LIFE_TIME_ENABLED= "%region_block_life_time_enabled%";
+    public static final String REGION_BLOCK_LIFE_TIME_ENABLED = "%region_block_life_time_enabled%";
+    public static final String REGION_BLOCK_PLACE_LIMIT_ENABLED = "%region_block_place_limit_enabled%";
+    public static final String REGION_BLOCK_GROUP_SIZE_ENABLED = "%region_block_group_size_enabled%";
     public static final String REGION_BLOCK_HOLOGRAM_TEMPLATE = "%region_block_hologram_template%";
     public static final String REGION_BLOCK_HOLOGRAM_ENABLED = "%region_block_hologram_enabled%";
     public static final String REGION_BLOCK_HOLOGRAM_IN_REGION = "%region_block_hologram_in_region%";

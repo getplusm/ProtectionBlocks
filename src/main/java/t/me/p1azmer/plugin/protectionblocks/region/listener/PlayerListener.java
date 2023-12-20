@@ -1,7 +1,9 @@
 package t.me.p1azmer.plugin.protectionblocks.region.listener;
 
 import io.papermc.paper.event.block.PlayerShearBlockEvent;
-import io.papermc.paper.event.player.*;
+import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent;
+import io.papermc.paper.event.player.PlayerFlowerPotManipulateEvent;
+import io.papermc.paper.event.player.PlayerLoomPatternSelectEvent;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -10,9 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +28,6 @@ import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
-    TODO: add support for this https://github.com/IzzelAliz/Arclight
- */
 public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     private final RegionManager manager;
     private final Map<Player, Region> playerRegionMap;
@@ -168,11 +164,6 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onWorldInteractBlocked(PlayerOpenSignEvent event) {
-        event.setCancelled(this.handleInteract(event.getPlayer(), event.getSign().getLocation()));
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
     public void onWorldInteractBlocked(PlayerBucketFillEvent event) {
         event.setCancelled(this.handleInteract(event.getPlayer(), event.getBlock().getLocation()));
     }
@@ -194,12 +185,8 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onWorldInteractBlocked(PlayerItemFrameChangeEvent event) {
-        event.setCancelled(this.handleInteract(event.getPlayer(), event.getItemFrame().getLocation()));
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
     public void onWorldInteractBlocked(PlayerChangeBeaconEffectEvent event) {
+        if (event.getBeacon() == null) return; // 1.17 check
         event.setCancelled(this.handleInteract(event.getPlayer(), event.getBeacon().getLocation()));
     }
 

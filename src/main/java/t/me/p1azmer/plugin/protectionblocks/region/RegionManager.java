@@ -18,6 +18,7 @@ import t.me.p1azmer.plugin.protectionblocks.Keys;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
+import t.me.p1azmer.plugin.protectionblocks.data.impl.RegionUser;
 import t.me.p1azmer.plugin.protectionblocks.region.editor.RGListEditor;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
@@ -172,6 +173,15 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         Region region = this.getRegionByBlock(block);
         if (region != null && !region.isAllowed(player)) return;
 
+        if (regionBlock.isPlaceLimitEnabled() && regionBlock.getPlaceLimit() != null) {
+            RegionUser regionUser = plugin.getUserManager().getUserData(player);
+            int limit = regionBlock.getPlaceLimit().getBestValue(player, 0);
+            if (regionUser.getAmountOf(regionBlock) >= limit) {
+                plugin.getMessage(Lang.REGION_ERROR_CREATED_LIMIT).send(player);
+                return;
+            }
+        }
+
         this.createRegion(player, block, regionBlock);
     }
 
@@ -187,7 +197,7 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
                 region.setLastDeposit(System.currentTimeMillis() + regionBlock.getLifeTime().getBestValue(player, 1000) * 1000L);
             else
                 region.setLastDeposit(-1);
-            region.setBlockLocation(block.getLocation());
+            region.setBlockLocation(block.getLocation(), regionBlock, player);
             region.setBlockHealth(regionBlock.getStrength());
             region.save();
 
@@ -216,6 +226,11 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
                     .replace(region.replacePlaceholders())
                     .send(player);
         });
+
+        plugin.getUserManager().getUserDataAndPerform(player.getUniqueId(), regionUser -> {
+            regionUser.addRegion(region, regionBlock);
+            plugin.getUserManager().saveUser(regionUser);
+        });
     }
 
     public boolean deleteRegionBlock(@NotNull RegionBlock regionBlock) {
@@ -242,9 +257,13 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
             double n2 = (0.5 + step * 0.15) % 3.0;
             for (int n3 = 0; n3 < n2 * 10.0; ++n3) {
                 double n4 = 6.283185307179586 / (n2 * 10.0) * n3;
-                UniParticle.redstone(Color.RED, 1).play(getPointOnCircle(loc.clone(), false, n4, n2, 1.0), 0.1f, 0.0f, 2);
+                UniParticle.redstone(Color.RED, 1).play(getPointOnCircle(loc.clone(), n4, n2, 1.0), 0.1f, 0.0f, 2);
             }
         }
+        plugin.getUserManager().getUserDataAndPerform(region.getOwner(), regionUser -> {
+            regionUser.removeRegion(region);
+            plugin.getUserManager().saveUser(regionUser);
+        });
     }
 
     public boolean tryDamageRegion(@Nullable Player player, @Nullable Object blockOrItem, @NotNull Block targetBlock, @NotNull Region region, @NotNull DamageType damageType, boolean notify) {
@@ -263,7 +282,7 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
             if (region.isRegionBlock(targetBlock)) {
                 region.takeBlockHealth(damageType);
                 if (region.getBlockHealth() == 0) {
-                    region.getBlockLocation().getBlock().breakNaturally(new ItemStack(Material.AIR), true, true);
+                    region.getBlockLocation().getBlock().breakNaturally(new ItemStack(Material.AIR));
                     this.deleteRegion(region, false);
                     if (notify) {
                         if (player != null) {
@@ -325,15 +344,13 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     }
 
     @NotNull
-    private Location getPointOnCircle(@NotNull Location loc, boolean doCopy, double x, double z, double y) {
-        return (doCopy ? loc.clone() : loc).add(Math.cos(x) * z, y, Math.sin(x) * z);
+    private Location getPointOnCircle(@NotNull Location loc, double x, double z, double y) {
+        return loc.add(Math.cos(x) * z, y, Math.sin(x) * z);
     }
 
     public enum DamageType {
         EXPLODE,
         HAND,
         TOOLS,
-        FALLING_BLOCK,
-        BLOCK_PLACE
     }
 }

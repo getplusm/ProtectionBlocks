@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'plazmer'
-version = '1.0.4'
+version = '1.0.5'
 
 repositories {
     mavenCentral()
@@ -36,7 +36,7 @@ dependencies {
     // PAPI
     compileOnly 'me.clip:placeholderapi:2.10.10'
     // Engine
-    compileOnly 'com.github.getplusm:Engine:2.4.3'
+    compileOnly 'com.github.getplusm:Engine:2.4.4'
     compileOnly files('D:/eclipse work/plazmer-engine-coins/build/libs/CoinsEngine-1.0.0.jar')
 }
 

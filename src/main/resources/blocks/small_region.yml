@@ -1,0 +1,28 @@
+Block:
+  Hologram:
+    Enabled: true
+    In_Region: false
+    Template: default
+Life_Time:
+  Enabled: false
+  Parameter:
+    default: 100
+Item: 1800020009km800kdlkmspb3e9gmct1qd5p6urivc9m6uorb18006t31cs5001r4d5pn0r31f440012ec5mma057fch6au3ke9gi4eirfch64rrccgh3kpj1dhpmab12d5q62r39cch3kpj1dhpmab12eln68pbidhkmspb448t6cobcediio8jjehp6iqr5ehk74rrlctk24ej6c5m76p9c49nm4pjledhm2t35cgh3kpj1dhpmab12cdnmorri48t24prfdhi24b12ehingt1278hd176gm38bnk5lq2ut336gnb8bhk5p438bvkc0q2sd1cmgm38o48jtbkm24t35f1q24eh249ugi0049hnn4p8800000080ndti4pboehp628hqbdti4ojfdhi24ej6c5m76p9c49kn8obcd5hi4ej6c5m76p9c49qmsp35e9m6irj5cgh3kpj1dhpmab12edq74qbbclq6gsjfeljmg8hqcpgmosr55gh6uoj6elpm6obkcli24ej6c5m76p9c49hmur3fe8h3k8j7e9gni8hc49q6au3k48t25k4hq2tt1fmgn8gd1d6gnf8ou86gnv8o1k5oq2pd1c6hgb8b086hgb8bbkc0q60d1e6hgb8btkc0q2sd1e12fleio8jkcls788hq48h7q0000400agrfeln78080
+Name: <gradient:#B2D9FF>Small Region</gradient:#4DA6FF>
+Region:
+  Deposit:
+    Price: 8
+    Currency_Id: vault
+  Strength: 1
+  Size:
+    Default: 6
+  Breakers:
+    List:
+      '0':
+        Item: k00010004qb4006mqqbeclhn4ob6egt78rjk0400agrfeln78080
+        Damage_Type: EXPLODE
+Limits:
+  Place:
+    Enabled: false
+    Groups:
+      default: 3

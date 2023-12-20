@@ -36,9 +36,11 @@ Messages:
         - '#5e9dfdВаш регион #fdba5e%region_location%#5e9dfd разрушен!'
       Enter: '#d4d9d8Вы вошли в регион игрока #e39fff%region_owner_name%#d4d9d8.'
       Exit: '#d4d9d8Вы покинули регион игрока #e39fff%region_owner_name%#d4d9d8.'
-      Break: '#fdba5eЭй!#d4d9d8 Прости, но тебе #fdba5eнельзя ломать этот блок#d4d9d8 здесь!'
+      Break: '#fdba5eЭй!#d4d9d8 Прости, но тебе нельзя #fdba5eломать этот блок#d4d9d8 здесь!'
+      Interact: '#fdba5eЭй!#d4d9d8 Прости, но тебе нельзя #fdba5eвзаимодействовать с этим#d4d9d8 здесь!'
     Error:
-      Nearby_Region: '#fd5e5eYou cannot create a region here, as it will cross over with another one!'
+      Nearby_Region: '#fd5e5eЗдесь нельзя создавать регион, так как он будет пересекаться с другим регионом!'
+      Limit: '#fd5e5eВы не можете создать регион этого типа, потому что достигли лимита!'
   Menu:
     Deposit:
       No_Enough_Money: '#fd5e5eУ Вас недостаточно денег, чтобы внести депозит!'
@@ -46,7 +48,7 @@ Messages:
     Members:
       Kick:
         Success: '#aefd5eУчастник #ffeea2%member_name%#aefd5e успешно удален из региона!'
-    No_Access: '#fd5e5eYou don''t have access to edit members!'
+    No_Access: '#fd5e5eУ Вас нет доступа к управлению участниками!'
 Editor:
   Region:
     Block:
@@ -65,7 +67,7 @@ Editor:
         Name: '#ead931&l%region_block_name% &7(ID: &f%region_block_id%&7)'
         Lore:
           - '#aaa8a8(#e8f2f2Левый-Клик#aaa8a8 для настройки#aaa8a8)'
-          - '#aaa8a8(#e8f2f2ШИФТ+ПКМ#aaa8a8 для удаления #fd5e5e(Не отменить)#aaa8a8)'
+          - '#aaa8a8(#e8f2f2ШИФТ+ПКМ#aaa8a8 для удаления #fd5e5e(Нельзя отменить)#aaa8a8)'
       Create:
         Name: '#ead931&lНовый блок региона'
         Lore: []
@@ -126,7 +128,7 @@ Editor:
             - '#aaa8a8#d4d9d8при нахождении игрока в регионе.'
             - ''
             - '#ead931&lТекущее:'
-            - '#ead931▪ #aaa8a8Только в Регионе: #ead931%region_block_hologram_in_region%#d4d9d8 (#e8f2f2[Q] Кнопка выброса#d4d9d8)'
+            - '#ead931▪ #aaa8a8Только в Регионе: #ead931%region_block_hologram_in_region%#d4d9d8 (#e8f2f2[Q] Ключ сброса#d4d9d8)'
             - '#ead931▪ #aaa8a8Включено: #ead931%region_block_hologram_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
             - '#ead931▪ #aaa8a8Шаблон: #ead931%region_block_hologram_template%#d4d9d8 (#e8f2f2Правый-Клик#d4d9d8)'
         Life_Time:
@@ -142,6 +144,25 @@ Editor:
             - '#aaa8a8#fd5e5eВы можете изменить это только в файле &lconfig.yml#fd5e5e'
             - '#ead931&lТекущее:'
             - '#ead931▪ #aaa8a8Включено: #ead931%region_block_life_time_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+        Place_Limit:
+          Name: '#ead931&lЛимит регионов'
+          Lore:
+            - '#aaa8a8Вы можете установить лимит блока на группу.'
+            - '#aaa8a8Если игрок достигнет лимита,'
+            - '#aaa8a8он не сможет создать регион этим блоком'
+            - '#aaa8a8'
+            - '#aaa8a8#fd5e5eВы можете изменить это только в файле &lconfig.yml#fd5e5e'
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Включено: #ead931%region_block_place_limit_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+        Group_Size:
+          Name: '#ead931&lРазмер для групп'
+          Lore:
+            - '#aaa8a8Вы можете установить разный размер'
+            - '#aaa8a8региона для определных групп'
+            - '#aaa8a8'
+            - '#aaa8a8#fd5e5eВы можете изменить это только в файле &lconfig.yml#fd5e5e'
+            - '#ead931&lТекущее:'
+            - '#ead931▪ #aaa8a8Включено: #ead931%region_block_group_size_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
       Breakers:
         Navigate:
           Name: '#ead931&lРазрушители Региона'
@@ -168,7 +189,7 @@ Editor:
             - '#ead931▪ #aaa8a8Тип Урона: #ead931%region_block_breaker_damage_type%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
             - ''
             - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы заменить предмет#aaa8a8)'
-            - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы удалить #fd5e5e(Не отменить)#aaa8a8)'
+            - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы удалить #fd5e5e(Нет отмены)#aaa8a8)'
     Members:
       Error:
         Player:
