@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group = 'plazmer'
@@ -62,5 +63,25 @@ processResources {
     filteringCharset 'UTF-8'
     filesMatching('plugin.yml') {
         expand props
+    }
+}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = "ProtectionBlocks"
+
+            pom {
+                name.set("ProtectionBlocks")
+                description.set("Plugin for protection regions via blocks")
+                url.set("https://github.com/getplusm/ProtectionBlocks")
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'jitpack'
+            url = 'https://jitpack.io'
+        }
     }
 }
