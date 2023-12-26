@@ -1,4 +1,5 @@
-<b>ProtectionsBlocks</b> - simple, fast, convenient and supported.
+# ProtectionBlocks [![](https://jitpack.io/v/getplusm/ProtectionBlocks.svg)](https://jitpack.io/#getplusm/ProtectionBlocks)
+<b>Simple, Fast, Convenient & Supported</b>
 
 <b>Lots of new features:</b>
 ```
