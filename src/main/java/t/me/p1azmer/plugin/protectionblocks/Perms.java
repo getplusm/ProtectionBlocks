@@ -18,13 +18,16 @@ public class Perms {
     public static final JPermission COMMAND_DEPOSIT = new JPermission(PREFIX_COMMAND + "deposit", "Access to the 'deposit' sub-command.");
     public static final JPermission COMMAND_DEPOSIT_OTHER = new JPermission(PREFIX_COMMAND + "deposit.other", "Access to the 'deposit other' sub-command.");
 
+    public static final JPermission COMMAND_TELEPORT = new JPermission(PREFIX_COMMAND + "teleport", "Access to the 'teleport' sub-command.");
+    public static final JPermission COMMAND_MENU = new JPermission(PREFIX_COMMAND + "menu", "Access to the 'menu' sub-command.");
+
     public static final JPermission BYPASS_REGION_MANIPULATION = new JPermission(PREFIX_BYPASS + "region.manipulation", "Access to the manipulation in regions");
 
     static {
         PLUGIN.addChildren(COMMAND, BYPASS);
 
         COMMAND.addChildren(COMMAND_RELOAD, COMMAND_EDITOR, COMMAND_GIVE,
-                COMMAND_DEPOSIT, COMMAND_DEPOSIT_OTHER);
+                COMMAND_DEPOSIT, COMMAND_DEPOSIT_OTHER, COMMAND_TELEPORT, COMMAND_MENU);
 
         BYPASS.addChildren(BYPASS_REGION_MANIPULATION);
     }

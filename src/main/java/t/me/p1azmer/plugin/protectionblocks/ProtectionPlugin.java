@@ -10,6 +10,8 @@ import t.me.p1azmer.engine.utils.EngineUtils;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
 import t.me.p1azmer.plugin.protectionblocks.commands.EditorCommand;
 import t.me.p1azmer.plugin.protectionblocks.commands.GiveCommand;
+import t.me.p1azmer.plugin.protectionblocks.commands.MenuCommand;
+import t.me.p1azmer.plugin.protectionblocks.commands.TeleportCommand;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
 import t.me.p1azmer.plugin.protectionblocks.currency.CurrencyManager;
@@ -104,6 +106,8 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements Use
         generalCommand.addChildren(new ReloadSubCommand<>(this, Perms.COMMAND_RELOAD));
         generalCommand.addChildren(new EditorCommand(this));
         generalCommand.addChildren(new GiveCommand(this));
+        generalCommand.addChildren(new TeleportCommand(this));
+        generalCommand.addChildren(new MenuCommand(this));
     }
 
     @Override

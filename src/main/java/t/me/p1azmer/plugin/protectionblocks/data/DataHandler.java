@@ -33,6 +33,7 @@ public class DataHandler extends AbstractUserDataHandler<ProtectionPlugin, Regio
                 long lastOnline = resultSet.getLong(COLUMN_USER_LAST_ONLINE.getName());
 
                 Map<String, String> regions = gson.fromJson(resultSet.getString(COLUMN_REGIONS.getName()), new TypeToken<Map<String, String>>() {}.getType());
+                this.mapSwapper(regions);
 
                 return new RegionUser(plugin, uuid, name, dateCreated, lastOnline, regions);
             }
@@ -41,6 +42,24 @@ public class DataHandler extends AbstractUserDataHandler<ProtectionPlugin, Regio
                 return null;
             }
         };
+    }
+
+    private void mapSwapper(@NotNull Map<String, String> map) { // bad but easy method
+        Map<String, String> updatedMap = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (plugin.getRegionManager().getRegionBlockById(key) != null) {
+                updatedMap.put(value, key);
+            } else {
+                updatedMap.put(key, value);
+            }
+        }
+
+        map.clear();
+        map.putAll(updatedMap);
     }
 
     @NotNull

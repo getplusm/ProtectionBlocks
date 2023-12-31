@@ -46,14 +46,14 @@ public class RegionUser extends AbstractUser<ProtectionPlugin> {
     }
 
     public void addRegion(@NotNull String regionId, @NotNull String regionBlockId) {
-        this.regions.put(regionBlockId.toLowerCase(), regionId.toLowerCase());
+        this.regions.put(regionId.toLowerCase(), regionBlockId.toLowerCase());
     }
 
     public void removeRegion(@NotNull Region region) {
-        this.regions.remove(region.getId());
+        this.regions.remove(region.getId(), region.getRegionBlockId());
     }
 
     public long getAmountOf(@NotNull RegionBlock regionBlock) {
-        return this.regions.values().stream().filter(founder -> regionBlock.getId().equals(founder)).count();
+        return this.regions.values().stream().filter(founder -> regionBlock.getId().equals(founder.toLowerCase())).count();
     }
 }

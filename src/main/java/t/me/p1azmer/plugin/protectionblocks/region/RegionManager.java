@@ -142,6 +142,11 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         return this.getRegionByLocation(block.getLocation());
     }
 
+    @Nullable
+    public Region getRegionById(@NotNull String id){
+        return this.getRegions().stream().filter(region-> region.getId().equalsIgnoreCase(id)).findFirst().orElse(null);
+    }
+
     public boolean isProtectedBlock(@NotNull Block block) {
         return this.getRegionByBlock(block) != null;
     }
@@ -169,64 +174,63 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         return true;
     }
 
-    public void tryCreateRegion(@NotNull Player player, @NotNull Block block, @NotNull ItemStack item, @NotNull RegionBlock regionBlock) {
+    public boolean tryCreateRegion(@NotNull Player player, @NotNull Block block, @NotNull ItemStack item, @NotNull RegionBlock regionBlock) {
         Region region = this.getRegionByBlock(block);
-        if (region != null && !region.isAllowed(player)) return;
-        if (!regionBlock.getWorlds().contains(block.getWorld().getName())) return;
+        if (region != null && !region.isAllowed(player) || !regionBlock.getWorlds().contains(block.getWorld().getName()))
+            return false;
 
         if (regionBlock.isPlaceLimitEnabled() && regionBlock.getPlaceLimit() != null) {
             RegionUser regionUser = plugin.getUserManager().getUserData(player);
             int limit = regionBlock.getPlaceLimit().getBestValue(player, 0);
             if (regionUser.getAmountOf(regionBlock) >= limit) {
                 plugin.getMessage(Lang.REGION_ERROR_CREATED_LIMIT).send(player);
-                return;
+                return false;
             }
         }
 
         this.createRegion(player, block, regionBlock);
+        return true;
     }
 
     public void createRegion(@NotNull Player player, @NotNull Block block, @NotNull RegionBlock regionBlock) {
         JYML cfg = new JYML(this.plugin.getDataFolder() + Config.REGION_DIR, UUID.randomUUID().toString().substring(0, 7).replace("-", "") + "-" + (this.getRegions().size() + 1) + ".yml");
         Region region = new Region(this, cfg);
 
-        plugin.runTask(sync -> {
-            region.setRegionBlockId(regionBlock.getId());
-            region.setOwner(player.getUniqueId());
-            region.setOwnerName(player.getName());
-            if (regionBlock.getLifeTime() != null && regionBlock.isLifeTimeEnabled())
-                region.setLastDeposit(System.currentTimeMillis() + regionBlock.getLifeTime().getBestValue(player, 1000) * 1000L);
-            else
-                region.setLastDeposit(-1);
-            region.setBlockLocation(block.getLocation(), regionBlock, player);
-            region.setBlockHealth(regionBlock.getStrength());
-            region.save();
+        region.setRegionBlockId(regionBlock.getId());
+        region.setOwner(player.getUniqueId());
+        region.setOwnerName(player.getName());
+        if (regionBlock.getLifeTime() != null && regionBlock.isLifeTimeEnabled())
+            region.setLastDeposit(System.currentTimeMillis() + regionBlock.getLifeTime().getBestValue(player, 1000) * 1000L);
+        else
+            region.setLastDeposit(-1);
+        region.setBlockLocation(block.getLocation(), regionBlock, player);
+        region.setBlockHealth(regionBlock.getStrength());
+        region.save();
 
-            this.getRegionMap().put(region.getId(), region);
+        this.getRegionMap().put(region.getId(), region);
 
-            block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(plugin, region.getId()));
-            // small & pretty effect
-            Location loc = block.getLocation().clone().add(0.5, -0.8D, 0.5);
-            for (int step = 0; step < 170 / 5; ++step) {
-                for (int boost = 0; boost < 3; boost++) {
-                    for (int strand = 1; strand <= 2; ++strand) {
-                        float progress = step / (float) (170 / 5);
-                        double point = 2.0F * progress * 2.0f * Math.PI / 2 + 6.283185307179586 * strand / 2 + 0.7853981633974483D;
-                        double addX = Math.cos(point) * progress * 1.5F;
-                        double addZ = Math.sin(point) * progress * 1.5F;
-                        double addY = 3.5D - 0.02 * 5 * step;
-                        Location location = loc.clone().add(addX, addY, addZ);
-                        UniParticle.redstone(Color.LIME, 1).play(location, 0.1f, 0.0f, 1);
-                    }
+        block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(plugin, region.getId()));
+        // small & pretty effect
+        Location loc = block.getLocation().clone().add(0.5, -0.8D, 0.5);
+        for (int step = 0; step < 170 / 5; ++step) {
+            for (int boost = 0; boost < 3; boost++) {
+                for (int strand = 1; strand <= 2; ++strand) {
+                    float progress = step / (float) (170 / 5);
+                    double point = 2.0F * progress * 2.0f * Math.PI / 2 + 6.283185307179586 * strand / 2 + 0.7853981633974483D;
+                    double addX = Math.cos(point) * progress * 1.5F;
+                    double addZ = Math.sin(point) * progress * 1.5F;
+                    double addY = 3.5D - 0.02 * 5 * step;
+                    Location location = loc.clone().add(addX, addY, addZ);
+                    UniParticle.redstone(Color.LIME, 1).play(location, 0.1f, 0.0f, 1);
                 }
             }
-            regionBlock.updateHologram(region);
+        }
+        regionBlock.updateHologram(region);
 
-            plugin.getMessage(Lang.REGION_SUCCESS_CREATED)
-                    .replace(regionBlock.replacePlaceholders())
-                    .replace(region.replacePlaceholders())
-                    .send(player);
-        });
+        plugin.getMessage(Lang.REGION_SUCCESS_CREATED)
+                .replace(regionBlock.replacePlaceholders())
+                .replace(region.replacePlaceholders())
+                .send(player);
 
         plugin.getUserManager().getUserDataAndPerform(player.getUniqueId(), regionUser -> {
             regionUser.addRegion(region, regionBlock);

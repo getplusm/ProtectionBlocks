@@ -56,9 +56,7 @@ public class RegionListener extends AbstractListener<ProtectionPlugin> {
             event.setCancelled(true);
             return;
         }
-        CompletableFuture.runAsync(() -> {
-            this.manager.tryCreateRegion(event.getPlayer(), block, item, regionBlock); // async create
-        });
+            event.setBuild(this.manager.tryCreateRegion(event.getPlayer(), block, item, regionBlock));
     }
 
     @EventHandler(priority = EventPriority.LOW)

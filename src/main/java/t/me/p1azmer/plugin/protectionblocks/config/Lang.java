@@ -11,10 +11,19 @@ public class Lang extends EngineLang {
 
     public static final LangKey COMMAND_GIVE_DESC = LangKey.of("Command.Give.Desc", "Give specified region block to a player.");
     public static final LangKey COMMAND_GIVE_USAGE = LangKey.of("Command.Give.Usage", "<region block> <player> <amount>");
-    public static final LangKey COMMAND_GIVE_DONE = LangKey.of("Command.Give.Done", "Given &ax%amount% %region_block_name%&7 to &a%player_name%&7.");
+    public static final LangKey COMMAND_GIVE_DONE = LangKey.of("Command.Give.Done", GRAY + "Given " + GREEN + "x%amount% %region_block_name%" + GRAY + " to " + GREEN + "%player_name%" + GRAY + ".");
+
+    public static final LangKey COMMAND_TELEPORT_DESC = LangKey.of("Command.Teleport.Desc", "Teleport to the region block.");
+    public static final LangKey COMMAND_TELEPORT_USAGE = LangKey.of("Command.Teleport.Usage", "<region_id>");
+    public static final LangKey COMMAND_TELEPORT_DONE = LangKey.of("Command.Teleport.Done", GREEN + "You have successfully teleported to the region block!");
+
+    public static final LangKey COMMAND_MENU_DESC = LangKey.of("Command.Menu.Desc", "Open the Menu of region block.");
+    public static final LangKey COMMAND_MENU_USAGE = LangKey.of("Command.Menu.Usage", "<region_id>");
+    public static final LangKey COMMAND_MENU_DONE = LangKey.of("Command.Menu.Done", GREEN + "The region block menu is open!");
 
     public static final LangKey ERROR_REGION_BLOCK_INVALID = LangKey.of("Error.Region_Block.Invalid", RED + "Invalid Region Block!");
 
+    public static final LangKey ERROR_REGION_NOT_FOUND = LangKey.of("Error.Region.Not_Found", RED + "Region not found!");
     public static final LangKey REGION_SUCCESS_CREATED = LangKey.of("Messages.Region.Success.Created", GREEN + "New Region successfully created!");
     public static final LangKey REGION_ERROR_CREATED_NEARBY_RG = LangKey.of("Messages.Region.Error.Nearby_Region", RED + "You cannot create a region here, as it will cross over with another one!");
     public static final LangKey REGION_ERROR_CREATED_LIMIT = LangKey.of("Messages.Region.Error.Limit", RED + "You cannot create a region of this type because you have reached the limit!");

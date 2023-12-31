@@ -304,7 +304,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         this.placeLimitEnabled = placeLimitEnabled;
         if (placeLimitEnabled) {
             if (!this.getConfig().contains("Limits.Place.Groups")) {
-                new PlayerRankMap<>(Map.of(DEFAULT, 3))
+                new PlayerRankMap<>(Map.of(DEFAULT, 3, "admin", -1))
                         .write(this.getConfig(), "Limits.Place.Groups");
             }
             this.placeLimit = PlayerRankMap.readInt(cfg, "Limits.Place.Groups");
