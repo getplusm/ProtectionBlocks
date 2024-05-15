@@ -38,7 +38,7 @@ public class MenuCommand extends AbstractCommand<ProtectionPlugin> {
             this.errorSender(sender);
             return;
         }
-        if (result.length() == 0) {
+        if (result.length() < 2) {
             this.printUsage(sender);
             return;
         }
