@@ -4,9 +4,10 @@ plugins {
 }
 
 group = 'plazmer'
-version = '1.0.7'
+version = '1.0.9'
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         name = "papermc-repo"
@@ -39,8 +40,7 @@ dependencies {
     // PAPI
     compileOnly 'me.clip:placeholderapi:2.10.10'
     // Engine
-    compileOnly 'com.github.getplusm:Engine:2.4.4'
-    compileOnly 'com.github.getplusm:CoinsEngine:1.0.2'
+    compileOnly 'com.github.getplusm:PLAZMER-ENGINE:2.4.6'
 }
 
 def targetJavaVersion = 17

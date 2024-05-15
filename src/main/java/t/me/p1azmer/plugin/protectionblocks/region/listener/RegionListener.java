@@ -17,10 +17,8 @@ import t.me.p1azmer.plugin.protectionblocks.api.events.BlockPlaceRegionEvent;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
-import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 import t.me.p1azmer.plugin.protectionblocks.utils.Cuboid;
-
-import java.util.concurrent.CompletableFuture;
 
 public class RegionListener extends AbstractListener<ProtectionPlugin> {
     private final RegionManager manager;

@@ -21,10 +21,14 @@ public class Lang extends EngineLang {
     public static final LangKey COMMAND_MENU_USAGE = LangKey.of("Command.Menu.Usage", "<region_id>");
     public static final LangKey COMMAND_MENU_DONE = LangKey.of("Command.Menu.Done", GREEN + "The region block menu is open!");
 
+    public static final LangKey COMMAND_PREVIEW_DESC = LangKey.of("Command.Preview.Desc", "Open the Preview Menu of region blocks.");
+
     public static final LangKey ERROR_REGION_BLOCK_INVALID = LangKey.of("Error.Region_Block.Invalid", RED + "Invalid Region Block!");
 
     public static final LangKey ERROR_REGION_NOT_FOUND = LangKey.of("Error.Region.Not_Found", RED + "Region not found!");
     public static final LangKey REGION_SUCCESS_CREATED = LangKey.of("Messages.Region.Success.Created", GREEN + "New Region successfully created!");
+
+    public static final LangKey REGION_SUCCESS_CREATED_WITH_LIFE_TIME = LangKey.of("Messages.Region.Success.Life_Time_Created", NO_PREFIX+GREEN + "The new region has been successfully created."+RED+"Be careful"+GREEN+", this region will be destroyed in: " + LIGHT_PURPLE + Placeholders.REGION_EXPIRE_IN);
     public static final LangKey REGION_ERROR_CREATED_NEARBY_RG = LangKey.of("Messages.Region.Error.Nearby_Region", RED + "You cannot create a region here, as it will cross over with another one!");
     public static final LangKey REGION_ERROR_CREATED_LIMIT = LangKey.of("Messages.Region.Error.Limit", RED + "You cannot create a region of this type because you have reached the limit!");
     public static final LangKey REGION_SUCCESS_DESTROY_SELF = LangKey.of("Messages.Region.Success.Destroy.Self", GREEN + "Region " + GRAY + "\u29c8" + Placeholders.REGION_ID + GREEN + " successfully removed!");

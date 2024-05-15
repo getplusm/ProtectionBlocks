@@ -20,6 +20,7 @@ public class Perms {
 
     public static final JPermission COMMAND_TELEPORT = new JPermission(PREFIX_COMMAND + "teleport", "Access to the 'teleport' sub-command.");
     public static final JPermission COMMAND_MENU = new JPermission(PREFIX_COMMAND + "menu", "Access to the 'menu' sub-command.");
+    public static final JPermission COMMAND_PREVIEW_MENU = new JPermission(PREFIX_COMMAND + "preview.menu", "Access to the 'preview menu' sub-command.");
 
     public static final JPermission BYPASS_REGION_MANIPULATION = new JPermission(PREFIX_BYPASS + "region.manipulation", "Access to the manipulation in regions");
 
@@ -27,7 +28,7 @@ public class Perms {
         PLUGIN.addChildren(COMMAND, BYPASS);
 
         COMMAND.addChildren(COMMAND_RELOAD, COMMAND_EDITOR, COMMAND_GIVE,
-                COMMAND_DEPOSIT, COMMAND_DEPOSIT_OTHER, COMMAND_TELEPORT, COMMAND_MENU);
+                COMMAND_DEPOSIT, COMMAND_DEPOSIT_OTHER, COMMAND_TELEPORT, COMMAND_MENU, COMMAND_PREVIEW_MENU);
 
         BYPASS.addChildren(BYPASS_REGION_MANIPULATION);
     }

@@ -13,7 +13,7 @@ import t.me.p1azmer.plugin.protectionblocks.Perms;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
-import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 
 import java.util.Arrays;
 import java.util.List;

@@ -128,6 +128,31 @@ public class EditorLocales extends t.me.p1azmer.engine.api.editor.EditorLocales 
             .text(YELLOW + "Breakers " + GRAY + "-" + LIGHT_YELLOW + " items that can destroy a this block")
             .click(LMB, "Navigate")
             .build();
+    public static final EditorLocale REGION_BLOCK_RECIPE_ICON = builder(PREFIX + "Region.Block.Recipe.Navigate")
+            .name("Block Recipe")
+            .text(
+                    "Create a crafting recipe for this block",
+                    "",
+                    YELLOW + "Enabled: " + Placeholders.REGION_BLOCK_RECIPE_ENABLED + GRAY + " (" + WHITE + DROP_KEY + GRAY + ")"
+            )
+            .click(LMB, "Navigate")
+            .click(SHIFT_RMB, "Clear")
+            .build();
+    public static final EditorLocale REGION_BLOCK_RECIPE_ITEM = builder(PREFIX + "Region.Block.Recipe.Item")
+            .emptyLine()
+            .click(DRAG_DROP, "Replace Item")
+            .click(RMB, "Get a Copy")
+            .build();
+    public static final EditorLocale REGION_BLOCK_RECIPE_BLOCK_ITEM = builder(PREFIX + "Region.Block.Recipe.Block_Item")
+            .text("This item will be gained",
+                    "when you create a craft.",
+                    "You can change the",
+                    "result in the main menu"
+            )
+            .build();
+    public static final EditorLocale REGION_BLOCK_RECIPE_CLEAR = builder(PREFIX + "Region.Block.Recipe.Clear")
+            .name(RED+"Clear (No Undo)")
+            .build();
     // breakers
     public static final EditorLocale REGION_BLOCK_BREAKERS_CREATE = builder(PREFIX + "Region.Block.Breakers.Create")
             .name("New Breaker")

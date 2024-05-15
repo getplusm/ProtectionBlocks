@@ -4,7 +4,7 @@ main: t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin
 api-version: '1.17'
 author: "plazmer"
 description: "Custom private region via blocks"
-depend: [PLAZMER-ENGINE]
+depend: [ PLAZMER-ENGINE ]
 folia-supported: true
 softdepend:
   - HolographicDisplays

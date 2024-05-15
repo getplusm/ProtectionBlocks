@@ -1,0 +1,42 @@
+Settings:
+  # Sets the GUI title.
+  Title: '#5d6d7e&l         Region Blocks'
+  # Sets the GUI size. Must be multiply of 9.
+  # Useful for 'CHEST' Inventory Type only.
+  Size: 54
+
+Preview:
+  Slots: 0-35
+  Name: '&r%region_block_name%'
+  Lore:
+    Default:
+      - '#9af7ff&lActions:'
+      - '#9af7ff▪ #ddeceeAny-Click: #9af7ffRecipe Preview'
+
+Content:
+  close:
+    Priority: 2
+    Slots: 49
+    Type: CLOSE
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==
+      Name: '#FF5733(✕) &lExit'
+
+  page_next:
+    Priority: 5
+    Slots: 50
+    Type: PAGE_NEXT
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19
+      Name: '#e6e4dd(→) &fNext Page'
+
+  page_previous:
+    Priority: 5
+    Slots: 48
+    Type: PAGE_PREVIOUS
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0=
+      Name: '#e6e4dd(←) &fPrevious Page'

@@ -11,9 +11,21 @@ Command:
     Desc: Выдать блок региона игроку
     Usage: <блок региона> <игрок> <кол-во>
     Done: Выдано &ax%amount% %region_block_name%&7 игроку &a%player_name%&7.
+  Teleport:
+    Desc: Телепортация к блоку региона
+    Usage: <айди региона>
+    Done: '#aefd5eВы успешно телепортированы к вашему блоку региона!'
+  Menu:
+    Desc: Открыть меню блока региона
+    Usage: <айди региона>
+    Done: '#aefd5eВы успено открыли меню региона!'
+  Preview:
+    Desc: Открыть пред.просмотр крафтов регионов
 Error:
   Region_Block:
     Invalid: '#fd5e5eНеверный блок региона!'
+  Region:
+    Not_Found: '#fd5e5eРегион не найден!'
 Messages:
   Region:
     Success:
@@ -25,13 +37,18 @@ Messages:
       Damaged:
         Target: '#aefd5eРегион #d4d9d8⧈%region_id%#aefd5e получил урон, но не сломался'
         Self:
-          - <! prefix:\"false\" !>"
+          - '<! prefix:"false" !>'
           - '#fd5e5e&l!! ВНИМАНИЕ !!'
           - '#5e9dfdВаш регион #fdba5e%region_location%#5e9dfd получил урон!#fd5e5e'
           - У него осталось &l%region_health%#fd5e5e жизней до разрушения!
+      Life_Time_Created:
+        - '#aefd5eНовый регион успешно создан.'
+        - '<! prefix:"false" !>'
+        - ''
+        - '#fd5e5eОсторожно#aefd5e, этот регион будет разрушен через: #e39fff%region_expire_in%'
     Notify:
       Destroy:
-        - <! prefix:\"false\" !>"
+        - '<! prefix:"false" !>'
         - '#fd5e5e&l!! ВНИМАНИЕ !!'
         - '#5e9dfdВаш регион #fdba5e%region_location%#5e9dfd разрушен!'
       Enter: '#d4d9d8Вы вошли в регион игрока #e39fff%region_owner_name%#d4d9d8.'
@@ -59,6 +76,7 @@ Editor:
         Value: '#d4d9d8Введите #aefd5eзначение#d4d9d8...'
         Life_Time: '#d4d9d8Введите #aefd5eимя #d4d9d8и #aefd5eвремя в секундах#d4d9d8...'
         HologramTemplate: '#d4d9d8Введите #aefd5eшаблон голограммы#d4d9d8...'
+        World: '#d4d9d8Enter #aefd5eworld name#d4d9d8...'
       Error:
         Exist: '&cБлок уже существует!'
         Currency:
@@ -163,6 +181,15 @@ Editor:
             - '#aaa8a8#fd5e5eВы можете изменить это только в файле &lconfig.yml#fd5e5e'
             - '#ead931&lТекущее:'
             - '#ead931▪ #aaa8a8Включено: #ead931%region_block_group_size_enabled%#d4d9d8 (#e8f2f2Левый-Клик#d4d9d8)'
+        Worlds:
+          Name: '#ead931&lRegion Worlds'
+          Lore:
+            - '#aaa8a8List of worlds where this'
+            - '#aaa8a8region block will be available'
+            - '#ead931&lCurrent:'
+            - '#ead931▪ #aaa8a8List: #ead931%region_block_worlds%'
+            - '#aaa8a8(#e8f2f2Left-Click#aaa8a8 to Add world#aaa8a8)'
+            - '#aaa8a8(#e8f2f2Shift-Right#aaa8a8 to Clear#aaa8a8)'
       Breakers:
         Navigate:
           Name: '#ead931&lРазрушители Региона'
@@ -190,6 +217,31 @@ Editor:
             - ''
             - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы заменить предмет#aaa8a8)'
             - '#aaa8a8(#e8f2f2Перетащите и отпустите#aaa8a8, чтобы удалить #fd5e5e(Нет отмены)#aaa8a8)'
+      Recipe:
+        Navigate:
+          Name: '#ead931&lРецепт Блока'
+          Lore:
+            - '#aaa8a8Создание рецепта создания этого блока'
+            - '#aaa8a8'
+            - '#aaa8a8#fdf35eВключен: %region_block_recipe_enabled%#d4d9d8 (#e8f2f2[Q] Drop Key#d4d9d8)'
+            - '#aaa8a8(#e8f2f2Left-Click#aaa8a8 to Navigate#aaa8a8)'
+            - '#aaa8a8(#e8f2f2Shift-Right#aaa8a8 to Clear#aaa8a8)'
+        Item:
+          Name: ''
+          Lore:
+            - ''
+            - '#aaa8a8(#e8f2f2Drag & Drop#aaa8a8 to Replace Item#aaa8a8)'
+            - '#aaa8a8(#e8f2f2Right-Click#aaa8a8 to Get a Copy#aaa8a8)'
+        Block_Item:
+          Name: ''
+          Lore:
+            - '#aaa8a8This item will be gained'
+            - '#aaa8a8when you create a craft.'
+            - '#aaa8a8You can change the'
+            - '#aaa8a8result in the main menu'
+        Clear:
+          Name: '#ead931&l#fd5e5eClear (No Undo)'
+          Lore: []
     Members:
       Error:
         Player:

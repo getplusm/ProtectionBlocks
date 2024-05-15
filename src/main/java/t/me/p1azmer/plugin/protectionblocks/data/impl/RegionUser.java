@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import t.me.p1azmer.engine.api.data.AbstractUser;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
-import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 
 import java.util.HashMap;
 import java.util.Map;

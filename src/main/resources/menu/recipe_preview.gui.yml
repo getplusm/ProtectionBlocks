@@ -1,0 +1,43 @@
+Settings:
+  # Sets the GUI title.
+  Title: '#5d6d7e&l    Block Recipe Preview'
+  # Sets the GUI size. Must be multiply of 9.
+  # Useful for 'CHEST' Inventory Type only.
+  Size: 54
+  # Sets the GUI auto-refresh interval (in seconds). Set this to 0 to disable.
+  Auto_Refresh: 0
+  # Sets the GUI type.
+  # https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/inventory/InventoryType.html
+  Inventory_Type: CHEST
+# ==================== GUI CONTENT ====================
+# You can freely edit items in this section as you wish (add, remove, modify items).
+# Get some tips in documentation: https://github.com/getplusm/Engine/wiki/Menu-Config
+# The following values are available for button types:
+# - PAGE_NEXT
+# - PAGE_PREVIOUS
+# - RETURN
+# ==================================================
+Content:
+  return:
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmU5YWU3YTRiZTY1ZmNiYWVlNjUxODEzODlhMmY3ZDQ3ZTJlMzI2ZGI1OWVhM2ViNzg5YTkyYzg1ZWE0NiJ9fX0=
+      Name: '#e6e4dd(↓) &fReturn'
+      Lore: []
+    Slots: 49
+    Priority: 100
+    Type: RETURN
+  background:
+    Priority: 1
+    Slots: 0,1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,22,23,24,25,26,27,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53
+    Item:
+      Material: BLACK_STAINED_GLASS_PANE
+      Name: ' '
+  crafting:
+    Priority: 2
+    # It's just better doesn't to change it,
+    # whatever the plugin sets items to those slots not from the config
+    Slots: 10,11,12,19,20,21,28,29,30
+    # You can change it
+    Item:
+      Material: AIR
