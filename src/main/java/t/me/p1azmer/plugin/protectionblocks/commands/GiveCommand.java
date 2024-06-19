@@ -43,7 +43,7 @@ public class GiveCommand extends AbstractCommand<ProtectionPlugin> {
 
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        if (result.length() < 3) {
+        if (result.length() < 2) {
             this.printUsage(sender);
             return;
         }
@@ -54,7 +54,12 @@ public class GiveCommand extends AbstractCommand<ProtectionPlugin> {
             return;
         }
 
-        Player player = plugin.getServer().getPlayer(result.getArg(2));
+        Player player = null;
+        if (result.length() >= 3)
+            player = plugin.getServer().getPlayer(result.getArg(2));
+        else if (sender instanceof Player) {
+            player = (Player) sender;
+        }
         if (player == null) {
             this.errorPlayer(sender);
             return;
@@ -69,9 +74,9 @@ public class GiveCommand extends AbstractCommand<ProtectionPlugin> {
         PlayerUtil.addItem(player, regionBlock.getItem(), amount);
 
         plugin.getMessage(Lang.COMMAND_GIVE_DONE)
-                .replace(regionBlock.replacePlaceholders())
-                .replace(Placeholders.forPlayer(player))
-                .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(amount))
-                .send(sender);
+              .replace(regionBlock.replacePlaceholders())
+              .replace(Placeholders.forPlayer(player))
+              .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(amount))
+              .send(sender);
     }
 }
