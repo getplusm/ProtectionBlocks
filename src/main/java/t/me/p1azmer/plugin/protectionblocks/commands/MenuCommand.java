@@ -54,8 +54,8 @@ public class MenuCommand extends AbstractCommand<ProtectionPlugin> {
         }
         region.getRegionMenu().open(player, 1);
         plugin.getMessage(Lang.COMMAND_MENU_DONE)
-                .replace(Placeholders.forLocation(region.getBlockLocation()))
-                .replace(Placeholders.forPlayer(player))
-                .send(sender);
+              .replace(Placeholders.forLocation(region.getBlockLocation()))
+              .replace(Placeholders.forPlayer(player))
+              .send(sender);
     }
 }

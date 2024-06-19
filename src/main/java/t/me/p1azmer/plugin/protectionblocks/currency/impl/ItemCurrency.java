@@ -31,8 +31,7 @@ public class ItemCurrency extends ConfigCurrency {
         ItemStack item;
         if (cfg.contains("Item.Material")) {
             item = cfg.getItem("Item");
-        }
-        else {
+        } else {
             item = cfg.getItemEncoded("Item");
         }
         if (item == null) {

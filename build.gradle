@@ -3,8 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'plazmer'
-version = '1.0.9'
+group = 'com.github.getplusm'
+version = '2.0.0'
 
 repositories {
     mavenLocal()
@@ -28,22 +28,31 @@ repositories {
     maven {
         url = 'https://jitpack.io'
     }
+    maven {
+        url = 'https://repo.fancyplugins.de/releases'
+    }
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT"
     // holo
     compileOnly 'me.filoghost.holographicdisplays:holographicdisplays-api:3.0.0'
     compileOnly 'com.github.decentsoftware-eu:decentholograms:2.8.3'
+    compileOnly("de.oliver:FancyHolograms:2.2.0")
     // LP
     compileOnly 'net.luckperms:api:5.4'
     // PAPI
     compileOnly 'me.clip:placeholderapi:2.10.10'
     // Engine
-    compileOnly 'com.github.getplusm:PLAZMER-ENGINE:2.4.6'
+    compileOnly 'com.github.getplusm:PLAZMER-ENGINE:2.4.7'
+
+    // https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine
+    compileOnly 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+    compileOnly('org.projectlombok:lombok:1.18.30')
+    annotationProcessor('org.projectlombok:lombok:1.18.30')
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -67,23 +76,69 @@ processResources {
         expand props
     }
 }
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        version = true
+    }
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = "ProtectionBlocks"
+
+            groupId rootProject.group
+            artifactId "protectionblocks"
+            version rootProject.version
+
+
+            def compileClasspathDependencies = configurations.compileClasspath.allDependencies
+            compileClasspathDependencies = compileClasspathDependencies
+                    .findAll { !(it instanceof ProjectDependency) }
 
             pom {
-                name.set("ProtectionBlocks")
-                description.set("Plugin for protection regions via blocks")
-                url.set("https://github.com/getplusm/ProtectionBlocks")
+                withXml {
+                    def dependenciesNode = asNode().children().find {
+                        it.name().getQualifiedName().equals('dependencies')
+                    }
+                    if (dependenciesNode == null) dependenciesNode = asNode().appendNode('dependencies')
+                    compileClasspathDependencies.each { dependency ->
+                        dependenciesNode.appendNode('dependency').with {
+                            appendNode('groupId', dependency.getGroup())
+                            appendNode('artifactId', dependency.getName())
+                            appendNode('version', dependency.getVersion())
+                            appendNode('scope', 'compile')
+                        }
+                    }
+                }
             }
-        }
-    }
-    repositories {
-        maven {
-            name = 'jitpack'
-            url = 'https://jitpack.io'
+
+            artifact sourcesJar
+            artifact javadocJar
+            repositories {
+                maven {
+                    name = 'jitpack'
+                    url = 'https://jitpack.io'
+                }
+            }
         }
     }
 }

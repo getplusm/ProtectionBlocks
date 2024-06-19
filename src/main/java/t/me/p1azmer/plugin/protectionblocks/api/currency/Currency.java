@@ -9,33 +9,33 @@ import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 
 public interface Currency extends Placeholder {
 
-  @NotNull
-  default String formatValue(double price) {
-    return NumberUtil.format(price);
-  }
+    @NotNull
+    default String formatValue(double price) {
+        return NumberUtil.format(price);
+    }
 
-  @NotNull
-  default String format(double price) {
-    return this.replacePlaceholders().apply(this.getFormat())
-               .replace(Placeholders.GENERIC_AMOUNT, this.formatValue(price))
-               .replace(Placeholders.GENERIC_PRICE, this.formatValue(price));
-  }
+    @NotNull
+    default String format(double price) {
+        return this.replacePlaceholders().apply(this.getFormat())
+                   .replace(Placeholders.GENERIC_AMOUNT, this.formatValue(price))
+                   .replace(Placeholders.GENERIC_PRICE, this.formatValue(price));
+    }
 
-  @Nullable
-  default CurrencyOfflineHandler getOfflineHandler() {
-    if (this instanceof CurrencyOfflineHandler handler) return handler;
-    if (this.getHandler() instanceof CurrencyOfflineHandler handler) return handler;
+    @Nullable
+    default CurrencyOfflineHandler getOfflineHandler() {
+        if (this instanceof CurrencyOfflineHandler handler) return handler;
+        if (this.getHandler() instanceof CurrencyOfflineHandler handler) return handler;
 
-    return null;
-  }
+        return null;
+    }
 
-  @NotNull CurrencyHandler getHandler();
+    @NotNull CurrencyHandler getHandler();
 
-  @NotNull String getId();
+    @NotNull String getId();
 
-  @NotNull String getName();
+    @NotNull String getName();
 
-  @NotNull String getFormat();
+    @NotNull String getFormat();
 
-  @NotNull ItemStack getIcon();
+    @NotNull ItemStack getIcon();
 }

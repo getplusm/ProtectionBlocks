@@ -32,12 +32,12 @@ public class DataHandler extends AbstractUserDataHandler<ProtectionPlugin, Regio
                 long dateCreated = resultSet.getLong(COLUMN_USER_DATE_CREATED.getName());
                 long lastOnline = resultSet.getLong(COLUMN_USER_LAST_ONLINE.getName());
 
-                Map<String, String> regions = gson.fromJson(resultSet.getString(COLUMN_REGIONS.getName()), new TypeToken<Map<String, String>>() {}.getType());
+                Map<String, String> regions = gson.fromJson(resultSet.getString(COLUMN_REGIONS.getName()), new TypeToken<Map<String, String>>() {
+                }.getType());
                 this.mapSwapper(regions);
 
                 return new RegionUser(plugin, uuid, name, dateCreated, lastOnline, regions);
-            }
-            catch (SQLException exception) {
+            } catch (SQLException exception) {
                 exception.printStackTrace();
                 return null;
             }
@@ -96,9 +96,7 @@ public class DataHandler extends AbstractUserDataHandler<ProtectionPlugin, Regio
     @Override
     @NotNull
     protected List<SQLValue> getSaveColumns(@NotNull RegionUser user) {
-        return Collections.singletonList(
-                COLUMN_REGIONS.toValue(this.gson.toJson(user.getRegions()))
-        );
+        return Collections.singletonList(COLUMN_REGIONS.toValue(this.gson.toJson(user.getRegions())));
     }
 
     @Override

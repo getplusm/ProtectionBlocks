@@ -25,6 +25,7 @@ import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.block.DamageType;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 import t.me.p1azmer.plugin.protectionblocks.region.menu.RegionMembersMenu;
 import t.me.p1azmer.plugin.protectionblocks.region.menu.RegionMenu;
@@ -40,7 +41,9 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
     private Cuboid cuboid;
     private UUID ownerUUID;
     private String ownerName;
-    private final List<RegionMember> members;
+    private final Set<RegionMember> members;
+    // TODO release soon
+    //private Map<String, Set<Object>> flags;
     private long createTime;
     private long lastDeposit;
     private String regionBlockId;
@@ -59,13 +62,14 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         this.manager = manager;
 
         this.createTime = System.currentTimeMillis();
-        this.members = new ArrayList<>();
+        this.members = new HashSet<>();
         this.placeholders = new PlaceholderMap()
           .add(Placeholders.REGION_ID, this::getId)
           .add(Placeholders.REGION_OWNER_NAME, () -> Colorizer.apply(this.getOwnerName()))
           .add(Placeholders.REGION_HEALTH, () -> String.valueOf(this.getBlockHealth()))
           .add(Placeholders.REGION_SIZE, () -> String.valueOf(this.getBlockHealth()))
           .add(Placeholders.REGION_MEMBERS_AMOUNT, () -> NumberUtil.format(this.getMembers().size()))
+          //.add(Placeholders.REGION_FLAGS, () -> String.join("\n", this.getFlags().keySet()))
           .add(Placeholders.REGION_EXPIRE_IN, () -> this.getLastDeposit() == -1 ? Colorizer.apply(Config.UNBREAKABLE.get()) : TimeUtil.formatTimeLeft(this.getLastDeposit()))
           .add(Placeholders.REGION_CREATION_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getCreateTime()))
           .add(Placeholders.REGION_LOCATION, () -> Placeholders.forLocation(this.getBlockLocation()).apply((Placeholders.LOCATION_WORLD + ": " + Placeholders.LOCATION_X + ", " + Placeholders.LOCATION_Y + ", " + Placeholders.LOCATION_Z).replace(Placeholders.LOCATION_WORLD, LangManager.getWorld(this.getBlockLocation().getWorld()))));
@@ -73,20 +77,26 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
 
     @Override
     public boolean load() {
-        Location from = cfg.getLocation("Bounds.From");
-        Location to = cfg.getLocation("Bounds.To");
-        if (from != null && to != null) {
-            this.cuboid = new Cuboid(from, to);
-        }
-
         this.blockLocation = this.cfg.getLocation("Block.Location");
         this.regionBlockId = this.cfg.getString("Block.Id", "");
         if (this.regionBlockId.isEmpty() || this.manager.getRegionBlockById(this.regionBlockId) == null) {
-            this.plugin.error("Cannot load the Region but Region Block '" + this.regionBlockId + "' not Created or Loaded!");
+            this.plugin.error("Cannot load the " + this.getId() + " but Region Block '" + this.regionBlockId + "' not Created or Loaded!");
             return false;
         }
-
-
+        this.regionBlock = this.manager.getRegionBlockById(this.getRegionBlockId());
+        if (this.regionBlock == null) {
+            this.plugin.error("Cannot load the " + this.getId() + " but Region Block '" + this.regionBlockId + "' not Created or Loaded!");
+            return false;
+        }
+        Location from = cfg.getLocation("Bounds.From");
+        Location to = cfg.getLocation("Bounds.To");
+        if (from != null && to != null) {
+            this.cuboid = new Cuboid(this.blockLocation, from, to, this.getRegionBlock().isInfinityYBlocks());
+        }
+        if (this.cuboid == null) {
+            this.plugin.error("Cannot load the " + this.getId() + " but Region Cuboid not loaded!");
+            return false;
+        }
         this.ownerUUID = UUID.fromString(this.cfg.getString("Owner", ""));
         this.ownerName = this.cfg.getString("Owner_Name", "");
         this.createTime = this.cfg.getLong("Time.Create");
@@ -96,6 +106,11 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         for (String sId : cfg.getSection("Members.List")) {
             this.getMembers().add(RegionMember.read(this.cfg, "Members.List." + sId));
         }
+
+//        for (String flagId : cfg.getSection("Flags")) {
+//            Set<Object> notAllowedData = new HashSet<>(cfg.getList( "Flags."+flagId+".Not_Allowed_Data", new ArrayList<>()));
+//            this.getFlags().put(flagId.toUpperCase(), notAllowedData);
+//        }
         return true;
     }
 
@@ -116,6 +131,10 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         for (RegionMember member : this.getMembers()) {
             member.write(cfg, "Members.List." + (i++));
         }
+
+//        for (Map.Entry<String, Set<Object>> entry  : this.getFlags().entrySet())  {
+//            cfg.set("Flags."+entry.getKey(), entry.getValue());
+//        }
     }
 
     public void loadLocations() {
@@ -123,16 +142,14 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
             this.getBlockLocation().getWorld().loadChunk(this.getBlockLocation().getChunk());
         }
         Block block = this.getBlockLocation().getBlock();
-        this.getRegionBlock().ifPresent(regionBlock -> {
-            if (!block.getType().equals(regionBlock.getItem().getType()))
-                block.setType(regionBlock.getItem().getType());
-            regionBlock.updateHologram(this);
-        });
+        if (!block.getType().equals(regionBlock.getItem().getType()))
+            block.setType(regionBlock.getItem().getType());
+        regionBlock.updateHologram(this);
         block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(this.plugin, this.getId()));
     }
 
     public void clear() {
-        this.getRegionBlock().ifPresent(regionBlock -> regionBlock.removeHologram(this));
+        this.getRegionBlock().removeHologram(this);
         if (this.regionMenu != null)
             this.regionMenu.clear();
         if (this.membersMenu != null) {
@@ -171,7 +188,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
 
     @Nullable
     public RegionMember getMemberById(@NotNull UUID uuid) {
-        return this.getMembers().stream().filter(f -> f.getId().equals(uuid)).findFirst().orElse(null);
+        return this.getMembers().stream().filter(f -> f.getUuid().equals(uuid)).findFirst().orElse(null);
     }
 
     @Nullable
@@ -193,7 +210,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
                    .collect(Collectors.toList());
     }
 
-    public Optional<Player> getOwnerPlayer(){
+    public Optional<Player> getOwnerPlayer() {
         return Optional.ofNullable(Bukkit.getPlayer(this.getOwnerUUID()));
     }
 
@@ -208,16 +225,9 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         return blockHealth;
     }
 
-    public void takeBlockHealth(@NotNull RegionManager.DamageType damageType) {
+    public void takeBlockHealth(@NotNull DamageType damageType) {
         this.blockHealth -= 1;
         if (this.blockHealth < 0) this.blockHealth = 0;
-    }
-
-    @NotNull
-    public Optional<RegionBlock> getRegionBlock() {
-        if (this.regionBlock == null)
-            this.regionBlock = this.manager.getRegionBlockById(this.getRegionBlockId());
-        return Optional.ofNullable(regionBlock);
     }
 
     public void setBlockLocation(@NotNull Location location, @NotNull RegionBlock regionBlock, @NotNull Player player) {
@@ -237,7 +247,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
             upperLocation.setY(temp);
         }
 
-        Cuboid cuboid = new Cuboid(lowerLocation, upperLocation);
+        Cuboid cuboid = new Cuboid(location, lowerLocation, upperLocation, regionBlock.isInfinityYBlocks());
         this.setCuboid(cuboid);
         this.setRegionSize(size);
     }
@@ -247,8 +257,14 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         this.save();
     }
 
-    public void setRegionBlockId(@NotNull String regionBlockId) {
-        this.regionBlockId = regionBlockId;
+    public void setRegionBlockAndId(RegionBlock regionBlock) {
+        this.regionBlock = regionBlock;
+        this.setRegionBlockId(regionBlock.getId());
+    }
+
+    public void setOwner(@NotNull Player player) {
+        this.setOwnerUUID(player.getUniqueId());
+        this.setOwnerName(player.getName());
     }
 
     public void addMember(@NotNull Player player) {

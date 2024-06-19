@@ -1,7 +1,11 @@
 package t.me.p1azmer.plugin.protectionblocks.integration.holograms;
 
-import eu.decentsoftware.holograms.api.DHAPI;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
+import de.oliver.fancyholograms.api.FancyHologramsPlugin;
+import de.oliver.fancyholograms.api.HologramManager;
+import de.oliver.fancyholograms.api.data.DisplayHologramData;
+import de.oliver.fancyholograms.api.hologram.Hologram;
+import de.oliver.fancyholograms.api.hologram.HologramType;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +17,7 @@ import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 
 import java.util.*;
 
-public class HologramDecentHandler implements HologramHandler {
+public class HologramFancyHandler implements HologramHandler {
     private Map<String, Set<Hologram>> holoMap;
 
     @Override
@@ -24,7 +28,7 @@ public class HologramDecentHandler implements HologramHandler {
     @Override
     public void shutdown() {
         if (this.holoMap != null) {
-            this.holoMap.values().forEach(set -> set.forEach(Hologram::delete));
+            this.holoMap.values().forEach(set -> set.forEach(Hologram::deleteHologram));
             this.holoMap = null;
         }
     }
@@ -33,13 +37,17 @@ public class HologramDecentHandler implements HologramHandler {
     public void create(@NotNull Region region) {
         Set<Hologram> holograms = this.holoMap.computeIfAbsent(region.getId(), set -> new HashSet<>());
         RegionBlock regionBlock = region.getRegionBlock();
+        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        DisplayHologramData displayData = new DisplayHologramData(UUID.randomUUID().toString(), HologramType.TEXT, this.fineLocation(region.getBlockLocation()));
+        displayData.setBillboard(DisplayHologramData.DEFAULT_BILLBOARD);
+        Hologram hologram = manager.create(displayData);
 
-        Hologram hologram = DHAPI.createHologram(UUID.randomUUID().toString(), this.fineLocation(region.getBlockLocation()), regionBlock.getHologramText(region));
-        if (regionBlock.isHologramInRegion()) {
-            hologram.setDefaultVisibleState(false);
-            hologram.hideAll();
-        } else
-            hologram.showAll();
+        manager.addHologram(hologram);
+
+        hologram.createHologram();
+        if (!regionBlock.isHologramInRegion()) {
+            hologram.showHologram(Bukkit.getOnlinePlayers());
+        }
         holograms.add(hologram);
     }
 
@@ -53,7 +61,7 @@ public class HologramDecentHandler implements HologramHandler {
         Set<Hologram> set = this.holoMap.remove(region.getId());
         if (set == null) return;
 
-        set.forEach(Hologram::delete);
+        set.forEach(Hologram::deleteHologram);
     }
 
     @Override
@@ -61,11 +69,7 @@ public class HologramDecentHandler implements HologramHandler {
         Set<Hologram> set = this.holoMap.get(region.getId());
         if (set == null) return;
 
-        set.forEach(hologram -> {
-            hologram.removeHidePlayer(player);
-            hologram.setShowPlayer(player);
-            hologram.update(player);
-        });
+        set.forEach(hologram -> hologram.forceShowHologram(player));
     }
 
     @Override
@@ -76,10 +80,6 @@ public class HologramDecentHandler implements HologramHandler {
         RegionBlock regionBlock = region.getRegionBlock();
         if (!regionBlock.isHologramInRegion()) return;
 
-        set.forEach(hologram -> {
-            hologram.removeShowPlayer(player);
-            hologram.setHidePlayer(player);
-            hologram.update(player);
-        });
+        set.forEach(hologram -> hologram.hideHologram(player));
     }
 }

@@ -29,6 +29,10 @@ public class Placeholders extends t.me.p1azmer.engine.utils.Placeholders {
     public static final String REGION_EXPIRE_IN = "%region_expire_in%";
     public static final String REGION_CREATION_TIME = "%region_creation_time%";
     public static final String REGION_SIZE = "%region_size%";
+    // flags
+    public static final String REGION_FLAGS = "%region_flags%";
+    public static final String FLAG_NAME = "%flag_name%";
+    public static final String FLAG_VALUES = "%flag_values%";
 
     // members
     public static final String MEMBER_JOIN_TIME = "%member_join_time%";
@@ -47,6 +51,7 @@ public class Placeholders extends t.me.p1azmer.engine.utils.Placeholders {
     public static final String REGION_BLOCK_HOLOGRAM_TEMPLATE = "%region_block_hologram_template%";
     public static final String REGION_BLOCK_HOLOGRAM_ENABLED = "%region_block_hologram_enabled%";
     public static final String REGION_BLOCK_HOLOGRAM_IN_REGION = "%region_block_hologram_in_region%";
+    public static final String REGION_IS_INFINITY_Y_BLOCKS = "%region_infinity_y_blocks%";
     public static final String REGION_BLOCK_RECIPE_ENABLED = "%region_block_recipe_enabled%";
     public static final String REGION_BLOCK_WORLDS = "%region_block_worlds%";
 

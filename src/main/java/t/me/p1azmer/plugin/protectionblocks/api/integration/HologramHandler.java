@@ -6,7 +6,6 @@ import t.me.p1azmer.engine.api.manager.Loadable;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 
 public interface HologramHandler extends Loadable {
-
     void create(@NotNull Region region);
 
     void delete(@NotNull Region region);

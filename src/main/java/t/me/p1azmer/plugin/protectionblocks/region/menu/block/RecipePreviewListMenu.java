@@ -36,9 +36,7 @@ public class RecipePreviewListMenu extends ConfigMenu<ProtectionPlugin> implemen
         this.previewLore = cfg.getStringList("Preview.Lore.Default");
         this.slots = cfg.getMenuSlots("Preview.Slots");
 
-        this.registerHandler(MenuItemType.class)
-                .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-        ;
+        this.registerHandler(MenuItemType.class).addClick(MenuItemType.CLOSE, ClickHandler.forClose(this));
         this.load();
     }
 
@@ -55,26 +53,29 @@ public class RecipePreviewListMenu extends ConfigMenu<ProtectionPlugin> implemen
 
     @Override
     public @NotNull List<RegionBlock> getObjects(@NotNull Player player) {
-        return this.manager.getRegionBlocks().stream().filter(f -> f.getRecipe().isEnabled()).collect(Collectors.toList());
+        return this.manager.getRegionBlocks()
+                           .stream()
+                           .filter(f -> f.getBlockRecipe().isEnabled())
+                           .collect(Collectors.toList());
     }
 
     @Override
     public @NotNull ItemStack getObjectStack(@NotNull Player player, @NotNull RegionBlock regionBlock) {
         ItemStack item = regionBlock.getItem();
         ItemReplacer.create(item)
-                .setLore(this.previewLore)
-                .setDisplayName(this.previewName)
-                .replaceLoreExact("%item_lore%", ItemUtil.getLore(item))
-                .replace(regionBlock.replacePlaceholders())
-                .replace(Colorizer::apply)
-                .writeMeta();
+                    .setLore(this.previewLore)
+                    .setDisplayName(this.previewName)
+                    .replaceLoreExact("%item_lore%", ItemUtil.getLore(item))
+                    .replace(regionBlock.replacePlaceholders())
+                    .replace(Colorizer::apply)
+                    .writeMeta();
         return item;
     }
 
     @Override
     public @NotNull ItemClick getObjectClick(@NotNull RegionBlock regionBlock) {
         return (viewer, event) -> {
-            regionBlock.getPreviewMenu().openNextTick(viewer, 1);
+            regionBlock.getPreviewMenu().openAsync(viewer, 1);
         };
     }
 }

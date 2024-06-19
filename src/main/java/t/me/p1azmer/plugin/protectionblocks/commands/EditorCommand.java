@@ -19,6 +19,6 @@ public class EditorCommand extends AbstractCommand<ProtectionPlugin> {
 
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        this.plugin.getRegionManager().getEditor().openNextTick((Player) sender, 1);
+        this.plugin.getRegionManager().getEditor().openAsync((Player) sender, 1);
     }
 }

@@ -4,7 +4,7 @@ import t.me.p1azmer.engine.api.lang.LangKey;
 import t.me.p1azmer.engine.lang.EngineLang;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 
-import static t.me.p1azmer.engine.utils.Colors.*;
+import static t.me.p1azmer.engine.utils.Colors2.*;
 
 public class Lang extends EngineLang {
     public static final LangKey COMMAND_EDITOR_DESC = LangKey.of("Command.Editor.Desc", "Open the region editor.");
@@ -28,25 +28,26 @@ public class Lang extends EngineLang {
     public static final LangKey ERROR_REGION_NOT_FOUND = LangKey.of("Error.Region.Not_Found", RED + "Region not found!");
     public static final LangKey REGION_SUCCESS_CREATED = LangKey.of("Messages.Region.Success.Created", GREEN + "New Region successfully created!");
 
-    public static final LangKey REGION_SUCCESS_CREATED_WITH_LIFE_TIME = LangKey.of("Messages.Region.Success.Life_Time_Created", NO_PREFIX+GREEN + "The new region has been successfully created."+RED+"Be careful"+GREEN+", this region will be destroyed in: " + LIGHT_PURPLE + Placeholders.REGION_EXPIRE_IN);
+    public static final LangKey REGION_SUCCESS_CREATED_WITH_LIFE_TIME = LangKey.of("Messages.Region.Success.Life_Time_Created", NO_PREFIX + GREEN + "The new region has been successfully created." + RED + "Be careful" + GREEN + ", this region will be destroyed in: " + LIGHT_PURPLE + Placeholders.REGION_EXPIRE_IN);
     public static final LangKey REGION_ERROR_CREATED_NEARBY_RG = LangKey.of("Messages.Region.Error.Nearby_Region", RED + "You cannot create a region here, as it will cross over with another one!");
     public static final LangKey REGION_ERROR_CREATED_LIMIT = LangKey.of("Messages.Region.Error.Limit", RED + "You cannot create a region of this type because you have reached the limit!");
+    public static final LangKey REGION_ERROR_CREATED_GLOBAL_LIMIT = LangKey.of("Messages.Region.Error.Global_Limit", RED + "You cannot create a region because you have reached the limit!");
     public static final LangKey REGION_SUCCESS_DESTROY_SELF = LangKey.of("Messages.Region.Success.Destroy.Self", GREEN + "Region " + GRAY + "\u29c8" + Placeholders.REGION_ID + GREEN + " successfully removed!");
     public static final LangKey REGION_SUCCESS_DESTROY_TARGET = LangKey.of("Messages.Region.Success.Destroy.Target", LIGHT_PURPLE + "You've just destroyed a region " + GRAY + "\u29c8 " + LIGHT_PURPLE + "!");
     public static final LangKey REGION_SUCCESS_DAMAGED_TARGET = LangKey.of("Messages.Region.Success.Damaged.Target", GREEN + "Region " + GRAY + "\u29c8" + Placeholders.REGION_ID + GREEN + " has been damaged, but it's not destroyed yet");
     public static final LangKey REGION_SUCCESS_DAMAGED_SELF = LangKey.of("Messages.Region.Success.Damaged.Self", NO_PREFIX +
-            RED + BOLD + "!! ALARM !!\n" +
-            BLUE + "Your Region " + ORANGE + Placeholders.REGION_LOCATION + BLUE + " has been damaged!" +
-            RED + "\nHe has " + BOLD + Placeholders.REGION_HEALTH + RED + " health(s) left and will be destroyed!\n");
+      RED + BOLD + "!! ALARM !!\n" +
+      BLUE + "Your Region " + ORANGE + Placeholders.REGION_LOCATION + BLUE + " has been damaged!" +
+      RED + "\nHe has " + BOLD + Placeholders.REGION_HEALTH + RED + " health(s) left and will be destroyed!\n");
     public static final LangKey REGION_DESTROY_NOTIFY = LangKey.of("Messages.Region.Notify.Destroy", NO_PREFIX +
-            RED + BOLD + "!! ALARM !!\n" +
-            BLUE + "Your Region " + ORANGE + Placeholders.REGION_LOCATION + BLUE + " was destroyed!\n");
+      RED + BOLD + "!! ALARM !!\n" +
+      BLUE + "Your Region " + ORANGE + Placeholders.REGION_LOCATION + BLUE + " was destroyed!\n");
 
     public static final LangKey REGION_ENTER_NOTIFY = LangKey.of("Messages.Region.Notify.Enter", GRAY + "You've entered a " + LIGHT_PURPLE + Placeholders.REGION_OWNER_NAME + GRAY + " region");
     public static final LangKey REGION_EXIT_NOTIFY = LangKey.of("Messages.Region.Notify.Exit", GRAY + "You've leave a " + LIGHT_PURPLE + Placeholders.REGION_OWNER_NAME + GRAY + " region");
     public static final LangKey REGION_ERROR_BREAK = LangKey.of("Messages.Region.Notify.Break", ORANGE + "Hey!" + GRAY + " I'm sorry, but you " + ORANGE + "can't break this block" + GRAY + " here!");
     public static final LangKey REGION_ERROR_INTERACT = LangKey.of("Messages.Region.Notify.Interact", ORANGE + "Hey!" + GRAY + " I'm sorry, but you " + ORANGE + "can't interact with this" + GRAY + " here!");
-
+    public static final LangKey REGION_CREATE_CANCELLED_VIA_EVENT = LangKey.of("Message.Region.Create.Error.Event", RED + "You cannot create a region for unknown reasons");
 
     public static final LangKey MENU_REGION_NO_ACCESS = LangKey.of("Messages.Menu.No_Access", RED + "You don't have access to edit members!");
     public static final LangKey MENU_REGION_DEPOSIT_NO_ENOUGH_MONEY = LangKey.of("Messages.Menu.Deposit.No_Enough_Money", RED + "You don't have enough money to pay for it!");

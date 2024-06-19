@@ -11,6 +11,7 @@ import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
+import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,6 @@ public class HologramDisplaysHandler implements HologramHandler {
 
     @Override
     public void setup() {
-
     }
 
     @Override
@@ -40,18 +40,17 @@ public class HologramDisplaysHandler implements HologramHandler {
     @Override
     public void create(@NotNull Region region) {
         Set<Hologram> holograms = this.holoMap.computeIfAbsent(region.getId(), set -> new HashSet<>());
-        region.getRegionBlock().ifPresent(regionBlock -> {
+        RegionBlock regionBlock = region.getRegionBlock();
 
-            Hologram hologram = this.hologramAPI.createHologram(this.fineLocation(region.getBlockLocation()));
-            for (String line : regionBlock.getHologramText(region)) {
-                hologram.getLines().appendText(line);
-            }
-            if (regionBlock.isHologramInRegion()) {
-                hologram.getVisibilitySettings().setGlobalVisibility(VisibilitySettings.Visibility.HIDDEN);
-            } else
-                hologram.getVisibilitySettings().setGlobalVisibility(VisibilitySettings.Visibility.VISIBLE);
-            holograms.add(hologram);
-        });
+        Hologram hologram = this.hologramAPI.createHologram(this.fineLocation(region.getBlockLocation()));
+        for (String line : regionBlock.getHologramText(region)) {
+            hologram.getLines().appendText(line);
+        }
+        if (regionBlock.isHologramInRegion()) {
+            hologram.getVisibilitySettings().setGlobalVisibility(VisibilitySettings.Visibility.HIDDEN);
+        } else
+            hologram.getVisibilitySettings().setGlobalVisibility(VisibilitySettings.Visibility.VISIBLE);
+        holograms.add(hologram);
     }
 
     @NotNull
@@ -71,14 +70,13 @@ public class HologramDisplaysHandler implements HologramHandler {
     public void show(@NotNull Region region, @NotNull Player player) {
         Set<Hologram> set = new HashSet<>(this.holoMap.getOrDefault(region.getId(), new HashSet<>()));
         if (set.isEmpty()) {
-            region.getRegionBlock().ifPresent(regionBlock -> {
+            RegionBlock regionBlock = region.getRegionBlock();
 
-                Hologram hologram = this.hologramAPI.createHologram(this.fineLocation(region.getBlockLocation()));
-                for (String line : regionBlock.getHologramText(region)) {
-                    hologram.getLines().appendText(line);
-                }
-                set.add(hologram);
-            });
+            Hologram hologram = this.hologramAPI.createHologram(this.fineLocation(region.getBlockLocation()));
+            for (String line : regionBlock.getHologramText(region)) {
+                hologram.getLines().appendText(line);
+            }
+            set.add(hologram);
         }
         set.forEach(hologram -> hologram.getVisibilitySettings().setIndividualVisibility(player, VisibilitySettings.Visibility.VISIBLE));
     }
@@ -86,11 +84,9 @@ public class HologramDisplaysHandler implements HologramHandler {
     @Override
     public void hide(@NotNull Region region, @NotNull Player player) {
         Set<Hologram> set = new HashSet<>(this.holoMap.getOrDefault(region.getId(), new HashSet<>()));
-        region.getRegionBlock().ifPresentOrElse(regionBlock -> {
-            if (!regionBlock.isHologramInRegion()) return;
+        RegionBlock regionBlock = region.getRegionBlock();
+        if (!regionBlock.isHologramInRegion()) return;
 
-            set.forEach(hologram -> hologram.getVisibilitySettings().removeIndividualVisibility(player));
-        }, () -> set.forEach(Hologram::delete));
+        set.forEach(hologram -> hologram.getVisibilitySettings().removeIndividualVisibility(player));
     }
-
 }

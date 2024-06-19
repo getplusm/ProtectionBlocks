@@ -15,18 +15,18 @@ public class RegionUser extends AbstractUser<ProtectionPlugin> {
 
     public RegionUser(@NotNull ProtectionPlugin plugin, @NotNull UUID uuid, @NotNull String name) {
         this(plugin, uuid, name, System.currentTimeMillis(), System.currentTimeMillis(),
-                new HashMap<>() // Regions
+          new HashMap<>() // Regions
         );
     }
 
     public RegionUser(
-            @NotNull ProtectionPlugin plugin,
-            @NotNull UUID uuid,
-            @NotNull String name,
-            long dateCreated,
-            long lastLogin,
+      @NotNull ProtectionPlugin plugin,
+      @NotNull UUID uuid,
+      @NotNull String name,
+      long dateCreated,
+      long lastLogin,
 
-            @NotNull Map<String, String> regions
+      @NotNull Map<String, String> regions
     ) {
         super(plugin, uuid, name, dateCreated, lastLogin);
         this.setRegions(regions);
@@ -55,5 +55,9 @@ public class RegionUser extends AbstractUser<ProtectionPlugin> {
 
     public long getAmountOf(@NotNull RegionBlock regionBlock) {
         return this.regions.values().stream().filter(founder -> regionBlock.getId().equals(founder.toLowerCase())).count();
+    }
+
+    public long getRegionsAmount() {
+        return this.regions.size();
     }
 }

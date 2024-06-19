@@ -23,37 +23,57 @@ import java.util.stream.IntStream;
 import static t.me.p1azmer.plugin.protectionblocks.editor.EditorLocales.*;
 
 public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
+    private static final ItemStack RETURN_ITEM = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTM4NTJiZjYxNmYzMWVkNjdjMzdkZTRiMGJhYTJjNWY4ZDhmY2E4MmU3MmRiY2FmY2JhNjY5NTZhODFjNCJ9fX0=");
+    private static final ItemStack CLEAR_ITEM = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2UxNzkzMmUwMTQyMjUzMTY1MzczOWQzYmVjZmJiNWNmNzhmNWY3NmEzZDdiNzY5ZTJmNjYxZjUyYzJhZjJkYSJ9fX0=");
+    private static final int[] craftingSlots = new int[]{
+      10, 11, 12,
+      19, 20, 21,
+      28, 29, 30
+    };
+
+    static {
+        ItemReplacer.create(RETURN_ITEM)
+                    .readLocale(RETURN)
+                    .hideFlags()
+                    .writeMeta();
+        ItemReplacer.create(CLEAR_ITEM)
+                    .readLocale(REGION_BLOCK_RECIPE_CLEAR)
+                    .hideFlags()
+                    .writeMeta();
+    }
 
     private final RegionBlock regionBlock;
-    private final int[] craftingSlots;
 
     public RGBlockRecipeEditor(@NotNull RegionBlock regionBlock) {
         super(regionBlock.plugin(), "Region Block Recipe", 54);
         this.regionBlock = regionBlock;
-        this.craftingSlots = new int[]{
-                10, 11, 12,
-                19, 20, 21,
-                28, 29, 30
-        };
         int[] emptySlots = IntStream.range(0, 54).toArray();
-        this.addItem(new MenuItem(new ItemStack(Material.BLACK_STAINED_GLASS_PANE))
-                .setSlots(emptySlots)
-        ).getOptions().setDisplayModifier((viewer, itemStack) -> ItemReplacer.create(itemStack).setDisplayName(" ").writeMeta());
-
         ItemStack blockItem = regionBlock.getItem();
-        ItemReplacer.create(blockItem).readLocale(REGION_BLOCK_RECIPE_BLOCK_ITEM).hideFlags().writeMeta();
+        ItemReplacer.create(blockItem)
+                    .readLocale(REGION_BLOCK_RECIPE_BLOCK_ITEM)
+                    .hideFlags()
+                    .writeMeta();
+        this.addItem(new MenuItem(new ItemStack(Material.BLACK_STAINED_GLASS_PANE)).setSlots(emptySlots).setPriority(0))
+            .getOptions()
+            .setDisplayModifier((viewer, itemStack) -> ItemReplacer.create(itemStack)
+                                                                   .setDisplayName(" ")
+                                                                   .writeMeta()
+            );
+
         this.addItem(new MenuItem(blockItem).setPriority(100).setSlots(24));
 
-        ItemStack returnItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTM4NTJiZjYxNmYzMWVkNjdjMzdkZTRiMGJhYTJjNWY4ZDhmY2E4MmU3MmRiY2FmY2JhNjY5NTZhODFjNCJ9fX0=");
-        ItemReplacer.create(returnItem).readLocale(RETURN).hideFlags().writeMeta();
-        this.addItem(returnItem).setSlots(49).setPriority(100).setClick((viewer, inventoryClickEvent) -> this.plugin.runTask(task -> regionBlock.getEditor().open(viewer.getPlayer(), 1)));
+        this.addItem(RETURN_ITEM)
+            .setSlots(49)
+            .setPriority(100)
+            .setClick((viewer, inventoryClickEvent) -> regionBlock.getEditor().openAsync(viewer.getPlayer(), 1));
 
-        ItemStack clearItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2UxNzkzMmUwMTQyMjUzMTY1MzczOWQzYmVjZmJiNWNmNzhmNWY3NmEzZDdiNzY5ZTJmNjYxZjUyYzJhZjJkYSJ9fX0=");
-        ItemReplacer.create(clearItem).readLocale(REGION_BLOCK_RECIPE_CLEAR).hideFlags().writeMeta();
-        this.addItem(clearItem).setSlots(47).setPriority(100).setClick((viewer, inventoryClickEvent) -> {
-            regionBlock.getRecipe().setSlotItemsMap(new LinkedHashMap<>());
-            this.save(viewer);
-        });
+        this.addItem(CLEAR_ITEM)
+            .setSlots(47)
+            .setPriority(100)
+            .setClick((viewer, inventoryClickEvent) -> {
+                regionBlock.getBlockRecipe().setSlotItemsMap(new LinkedHashMap<>());
+                this.save(viewer);
+            });
     }
 
     private void save(@NotNull MenuViewer viewer) {
@@ -65,30 +85,34 @@ public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
-        Arrays.stream(this.craftingSlots).forEach(slot->this.addItem(new ItemStack(Material.AIR, slot)));
+        Arrays.stream(craftingSlots).forEach(slot -> this.addItem(new ItemStack(Material.AIR, slot)));
 
-        new LinkedHashMap<>(regionBlock.getRecipe().getSlotItemsMap()).forEach((slot, itemStack) -> {
-            MenuItem menuItem = new MenuItem(itemStack)
-                    .setPriority(101)
-                    .setSlots(slot)
-                    .setClick((menuViewer, inventoryClickEvent) -> {
-                        if (inventoryClickEvent.getClick().equals(ClickType.RIGHT)) {
-                            PlayerUtil.addItem(menuViewer.getPlayer(), itemStack);
-                        }
-                    });
-            this.addItem(menuItem).getOptions().setDisplayModifier((menuViewer, itemStack1) -> {
-                if (itemStack1.getType().isAir()) {
-                    itemStack1.setType(Material.GRAY_STAINED_GLASS_PANE);
-                    ItemReplacer.create(itemStack1)
-                            .readLocale(REGION_BLOCK_RECIPE_ITEM)
-                            .setDisplayName(Colors2.WHITE + "AIR").replace(Colorizer::apply).writeMeta();
-                    menuItem.setPriority(100);
-                } else
-                    ItemReplacer.create(itemStack1)
-                            .readLocale(REGION_BLOCK_RECIPE_ITEM).writeMeta();
-            });
+        new LinkedHashMap<>(regionBlock.getBlockRecipe().getSlotItemsMap()).forEach((slot, itemStack) -> {
+            MenuItem menuItem = new MenuItem(itemStack).setPriority(101)
+                                                       .setSlots(slot)
+                                                       .setClick((menuViewer, inventoryClickEvent) -> {
+                                                           if (inventoryClickEvent.getClick().equals(ClickType.RIGHT)) {
+                                                               PlayerUtil.addItem(menuViewer.getPlayer(), itemStack);
+                                                           }
+                                                       });
+            this.addItem(menuItem)
+                .getOptions()
+                .setDisplayModifier((menuViewer, itemStack1) -> {
+                    if (itemStack1.getType().isAir()) {
+                        itemStack1.setType(Material.GRAY_STAINED_GLASS_PANE);
+                        ItemReplacer.create(itemStack1)
+                                    .readLocale(REGION_BLOCK_RECIPE_ITEM)
+                                    .setDisplayName(Colors2.WHITE + "AIR").replace(Colorizer::apply).writeMeta();
+                        menuItem.setPriority(100);
+                    } else {
+                        ItemReplacer.create(itemStack1)
+                                    .readLocale(REGION_BLOCK_RECIPE_ITEM)
+                                    .writeMeta();
+                    }
+                });
         });
     }
+
     @Override
     public void onClick(@NotNull MenuViewer viewer, @Nullable ItemStack itemOnSlot, @NotNull SlotType slotType, int slot, @NotNull InventoryClickEvent event) {
         super.onClick(viewer, itemOnSlot, slotType, slot, event);
@@ -103,9 +127,9 @@ public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
         }
 
         if (slotType == SlotType.MENU) {
-            if (Arrays.stream(this.craftingSlots).anyMatch(s -> s == slot)) {
+            if (Arrays.stream(craftingSlots).anyMatch(s -> s == slot)) {
                 if (event.isLeftClick()) {
-                    this.regionBlock.getRecipe().setItem(slot, new ItemStack(itemOnCursor));
+                    this.regionBlock.getBlockRecipe().setItem(slot, new ItemStack(itemOnCursor));
                     player.setItemOnCursor(null);
                     this.save(viewer);
                 }
@@ -115,7 +139,7 @@ public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
 
     @Override
     public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
-        this.regionBlock.getRecipe().reload();
+        this.regionBlock.getBlockRecipe().reload();
         super.onClose(viewer, event);
     }
 }

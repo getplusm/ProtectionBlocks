@@ -1,11 +1,14 @@
 name: ProtectionBlocks
 version: '${version}'
 main: t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin
-api-version: '1.17'
+api-version: '1.18'
 author: "plazmer"
 description: "Custom private region via blocks"
-depend: [ PLAZMER-ENGINE ]
 folia-supported: true
+depend: [ PLAZMER-ENGINE ]
 softdepend:
   - HolographicDisplays
   - DecentHolograms
+  - FancyHolograms
+libraries:
+  - com.github.ben-manes.caffeine:caffeine:3.1.8

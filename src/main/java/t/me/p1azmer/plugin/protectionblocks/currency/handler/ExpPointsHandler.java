@@ -17,9 +17,6 @@ public class ExpPointsHandler implements CurrencyHandler {
     private void modify(@NotNull Player player, double amount1, @NotNull BiFunction<Integer, Integer, Integer> f) {
         int amount = (int) amount1;
         int levelHas = player.getLevel();
-        //int expHas = player.getTotalExperience();
-
-        //if (result.hasFlag(FLAG_LEVEL)) {
         int levelFinal = Math.max(0, f.apply(levelHas, amount));
         int expBasic = 0;
         int expLeft = (int) (this.getExpRequired(levelFinal) * player.getExp());
@@ -27,10 +24,7 @@ public class ExpPointsHandler implements CurrencyHandler {
             expBasic += (this.getExpRequired(level));
         }
         int expHas = expBasic + expLeft;
-        /*}
-        else {
-            expHas = Math.max(0, mode.modify(expHas, amount));
-        }*/
+
         player.setExp(0F);
         player.setTotalExperience(0);
         player.setLevel(0);

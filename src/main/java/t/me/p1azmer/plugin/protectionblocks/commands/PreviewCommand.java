@@ -22,6 +22,6 @@ public class PreviewCommand extends AbstractCommand<ProtectionPlugin> {
             this.errorSender(sender);
             return;
         }
-        this.plugin.getRegionManager().getRecipePreviewListMenu().openNextTick(player, 1);
+        this.plugin.getRegionManager().getRecipePreviewListMenu().openAsync(player, 1);
     }
 }
