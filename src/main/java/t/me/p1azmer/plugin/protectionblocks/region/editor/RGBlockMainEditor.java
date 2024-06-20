@@ -50,7 +50,7 @@ public class RGBlockMainEditor extends EditorMenu<ProtectionPlugin, RegionBlock>
                 if (!cursor.getType().isAir()) {
                     regionBlock.setItem(cursor);
                     PlayerUtil.addItem(viewer.getPlayer(), cursor);
-                    event.getView().setCursor(null);
+                    viewer.getPlayer().setItemOnCursor(null);
                     this.save(viewer);
                 }
             })

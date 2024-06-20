@@ -131,15 +131,15 @@ public class RegionListener extends AbstractListener<ProtectionPlugin> {
 
     @EventHandler
     public void onPiston(BlockPistonExtendEvent event) {
-        boolean result = this.handlePiston(event.getBlocks(), event.getBlock(), event.getDirection());
-        if (result)
+        boolean cancelled = this.handlePiston(event.getBlocks(), event.getBlock(), event.getDirection());
+        if (cancelled)
             event.setCancelled(true);
     }
 
     @EventHandler
     public void onPiston(BlockPistonRetractEvent event) {
-        boolean result = this.handlePiston(event.getBlocks(), event.getBlock(), event.getDirection());
-        if (result)
+        boolean cancelled = this.handlePiston(event.getBlocks(), event.getBlock(), event.getDirection());
+        if (cancelled)
             event.setCancelled(true);
     }
 
@@ -156,8 +156,9 @@ public class RegionListener extends AbstractListener<ProtectionPlugin> {
     }
 
     private boolean handlePiston(@NotNull List<Block> blockList, @NotNull Block pistonBlock, @NotNull BlockFace direction) {
-        Location retractLocation = pistonBlock.getRelative(direction, blockList.size()).getLocation();
-        Region region = this.manager.getRegionByLocation(retractLocation);
+        int distance = blockList.size();
+        Location location = pistonBlock.getRelative(direction, distance).getLocation();
+        Region region = this.manager.getRegionByLocation(location);
         if (region != null) return true;
 
         for (Block block : blockList) {
