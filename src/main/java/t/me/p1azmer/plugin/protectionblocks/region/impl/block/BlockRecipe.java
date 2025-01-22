@@ -1,5 +1,11 @@
 package t.me.p1azmer.plugin.protectionblocks.region.impl.block;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -13,16 +19,16 @@ import t.me.p1azmer.plugin.protectionblocks.Keys;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Setter
+@Getter
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BlockRecipe {
-    private final RegionBlock regionBlock;
-    private Map<Integer, ItemStack> slotItemsMap;
-    private boolean enabled;
-
-    public BlockRecipe(@NotNull RegionBlock regionBlock, @NotNull Map<Integer, ItemStack> slotItemsMap, boolean enabled) {
-        this.regionBlock = regionBlock;
-        this.slotItemsMap = slotItemsMap;
-        this.enabled = enabled;
-    }
+    RegionBlock regionBlock;
+    @NonFinal
+    Map<Integer, ItemStack> slotItemsMap;
+    @NonFinal
+    boolean enabled;
 
     public static BlockRecipe read(@NotNull JYML cfg, @NotNull String path, @NotNull RegionBlock regionBlock) {
         Map<Integer, ItemStack> slotItems = new LinkedHashMap<>();
@@ -45,23 +51,20 @@ public class BlockRecipe {
     public void setup() {
         if (!this.isEnabled()) return;
 
-        if (this.getSlotItemsMap()
-                .values()
-                .stream()
-                .filter(f -> f.getType().isAir())
-                .count() >= 8) {
+        if (this.getSlotItemsMap().values().stream().filter(f -> f.getType().isAir()).count() >= 8) {
             return;
         }
 
         ShapelessRecipe shapelessRecipe = new ShapelessRecipe(Keys.REGION_BLOCK_RECIPE(this), this.getRegionBlock().getItem());
-        this.getSlotItemsMap().forEach((slot, itemStack) -> shapelessRecipe.addIngredient(itemStack));
+        this.getSlotItemsMap().entrySet().stream()
+                .filter(e -> !e.getValue().getType().isAir())
+                .forEach(entry -> shapelessRecipe.addIngredient(entry.getValue()));
 
         if (Version.isBehind(Version.V1_20_R1)) {
             Bukkit.addRecipe(shapelessRecipe);
-        }else {
+        } else {
             Bukkit.addRecipe(shapelessRecipe, true);
         }
-
     }
 
     public void reload() {
@@ -77,18 +80,10 @@ public class BlockRecipe {
         }
     }
 
-    @NotNull
-    public RegionBlock getRegionBlock() {
-        return regionBlock;
-    }
 
-    @NotNull
-    public Map<Integer, ItemStack> getSlotItemsMap() {
-        return this.slotItemsMap;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        this.reload();
     }
 
     @NotNull
@@ -96,16 +91,7 @@ public class BlockRecipe {
         return new ItemStack(this.slotItemsMap.getOrDefault(slot, new ItemStack(Material.AIR)));
     }
 
-    public void setSlotItemsMap(@NotNull Map<Integer, ItemStack> slotItemsMap) {
-        this.slotItemsMap = slotItemsMap;
-    }
-
     public void setItem(int slot, @NotNull ItemStack item) {
         this.slotItemsMap.put(slot, item);
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        this.reload();
     }
 }

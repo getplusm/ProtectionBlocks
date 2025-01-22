@@ -2,9 +2,8 @@ package t.me.p1azmer.plugin.protectionblocks.integration.holograms;
 
 import de.oliver.fancyholograms.api.FancyHologramsPlugin;
 import de.oliver.fancyholograms.api.HologramManager;
-import de.oliver.fancyholograms.api.data.DisplayHologramData;
+import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
-import de.oliver.fancyholograms.api.hologram.HologramType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -15,7 +14,10 @@ import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class HologramFancyHandler implements HologramHandler {
     private Map<String, Set<Hologram>> holoMap;
@@ -38,10 +40,13 @@ public class HologramFancyHandler implements HologramHandler {
         Set<Hologram> holograms = this.holoMap.computeIfAbsent(region.getId(), set -> new HashSet<>());
         RegionBlock regionBlock = region.getRegionBlock();
         HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-        DisplayHologramData displayData = new DisplayHologramData(UUID.randomUUID().toString(), HologramType.TEXT, this.fineLocation(region.getBlockLocation()));
-        displayData.setBillboard(DisplayHologramData.DEFAULT_BILLBOARD);
-        Hologram hologram = manager.create(displayData);
+        Location location = this.fineLocation(region.getBlockLocation());
+        TextHologramData textData = new TextHologramData("", location);
 
+        textData.setText(regionBlock.getHologramText(region));
+        textData.setPersistent(true);
+
+        Hologram hologram = manager.create(textData);
         manager.addHologram(hologram);
 
         hologram.createHologram();
@@ -53,7 +58,7 @@ public class HologramFancyHandler implements HologramHandler {
 
     @NotNull
     private Location fineLocation(@NotNull Location location) {
-        return LocationUtil.getCenter(location.clone()).add(0D, Config.REGION_HOLOGRAM_Y_OFFSET.get(), 0D);
+        return location.toCenterLocation().add(0D, Config.REGION_HOLOGRAM_Y_OFFSET.get(), 0D);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class HologramFancyHandler implements HologramHandler {
         Set<Hologram> set = this.holoMap.get(region.getId());
         if (set == null) return;
 
-        set.forEach(hologram -> hologram.forceShowHologram(player));
+        set.forEach(hologram -> hologram.showHologram(player));
     }
 
     @Override

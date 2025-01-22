@@ -55,7 +55,7 @@ public class HologramDisplaysHandler implements HologramHandler {
 
     @NotNull
     private Location fineLocation(@NotNull Location location) {
-        return LocationUtil.getCenter(location.clone()).add(0D, Config.REGION_HOLOGRAM_Y_OFFSET.get(), 0D);
+        return location.toCenterLocation().add(0D, Config.REGION_HOLOGRAM_Y_OFFSET.get(), 0D);
     }
 
     @Override

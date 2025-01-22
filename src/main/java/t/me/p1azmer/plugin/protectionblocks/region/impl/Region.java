@@ -1,7 +1,9 @@
 package t.me.p1azmer.plugin.protectionblocks.region.impl;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -25,8 +27,12 @@ import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
+import t.me.p1azmer.plugin.protectionblocks.region.flags.Flag;
+import t.me.p1azmer.plugin.protectionblocks.region.flags.FlagsController;
+import t.me.p1azmer.plugin.protectionblocks.region.flags.self.RegionFlagSettings;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.block.DamageType;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.block.RegionBlock;
+import t.me.p1azmer.plugin.protectionblocks.region.members.RegionMember;
 import t.me.p1azmer.plugin.protectionblocks.region.menu.RegionMembersMenu;
 import t.me.p1azmer.plugin.protectionblocks.region.menu.RegionMenu;
 import t.me.p1azmer.plugin.protectionblocks.utils.Cuboid;
@@ -36,26 +42,30 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Placeholder {
-    private Location blockLocation;
-    private Cuboid cuboid;
-    private UUID ownerUUID;
-    private String ownerName;
-    private final Set<RegionMember> members;
-    // TODO release soon
-    //private Map<String, Set<Object>> flags;
-    private long createTime;
-    private long lastDeposit;
-    private String regionBlockId;
-    private final PlaceholderMap placeholders;
-    private final RegionManager manager;
-    private RegionBlock regionBlock;
-    private int blockHealth;
-    private int regionSize;
+    final Set<RegionMember> members;
+    final PlaceholderMap placeholders;
+    final RegionManager manager;
+
+    Location blockLocation;
+    Cuboid cuboid;
+    UUID ownerUUID;
+    String ownerName;
+    Set<RegionFlagSettings> flags;
+
+    long createTime;
+    long lastDeposit;
+
+    String regionBlockId;
+    RegionBlock regionBlock;
+
+    int blockHealth;
+    int regionSize;
 
     // cache
-    private RegionMenu regionMenu;
-    private RegionMembersMenu membersMenu;
+    RegionMenu regionMenu;
+    RegionMembersMenu membersMenu;
 
     public Region(@NotNull RegionManager manager, @NotNull JYML cfg) {
         super(manager.plugin(), cfg);
@@ -63,16 +73,16 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
 
         this.createTime = System.currentTimeMillis();
         this.members = new HashSet<>();
+        this.flags = plugin().getFlagsController().setupDefaultRegionFlags(new HashSet<>());
         this.placeholders = new PlaceholderMap()
-          .add(Placeholders.REGION_ID, this::getId)
-          .add(Placeholders.REGION_OWNER_NAME, () -> Colorizer.apply(this.getOwnerName()))
-          .add(Placeholders.REGION_HEALTH, () -> String.valueOf(this.getBlockHealth()))
-          .add(Placeholders.REGION_SIZE, () -> String.valueOf(this.getBlockHealth()))
-          .add(Placeholders.REGION_MEMBERS_AMOUNT, () -> NumberUtil.format(this.getMembers().size()))
-          //.add(Placeholders.REGION_FLAGS, () -> String.join("\n", this.getFlags().keySet()))
-          .add(Placeholders.REGION_EXPIRE_IN, () -> this.getLastDeposit() == -1 ? Colorizer.apply(Config.UNBREAKABLE.get()) : TimeUtil.formatTimeLeft(this.getLastDeposit()))
-          .add(Placeholders.REGION_CREATION_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getCreateTime()))
-          .add(Placeholders.REGION_LOCATION, () -> Placeholders.forLocation(this.getBlockLocation()).apply((Placeholders.LOCATION_WORLD + ": " + Placeholders.LOCATION_X + ", " + Placeholders.LOCATION_Y + ", " + Placeholders.LOCATION_Z).replace(Placeholders.LOCATION_WORLD, LangManager.getWorld(this.getBlockLocation().getWorld()))));
+                .add(Placeholders.REGION_ID, this::getId)
+                .add(Placeholders.REGION_OWNER_NAME, () -> Colorizer.apply(this.getOwnerName()))
+                .add(Placeholders.REGION_HEALTH, () -> String.valueOf(this.getBlockHealth()))
+                .add(Placeholders.REGION_SIZE, () -> String.valueOf(this.getBlockHealth()))
+                .add(Placeholders.REGION_MEMBERS_AMOUNT, () -> NumberUtil.format(this.getMembers().size()))
+                .add(Placeholders.REGION_EXPIRE_IN, () -> this.getLastDeposit() == -1 ? Colorizer.apply(Config.UNBREAKABLE.get()) : TimeUtil.formatTimeLeft(this.getLastDeposit()))
+                .add(Placeholders.REGION_CREATION_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getCreateTime()))
+                .add(Placeholders.REGION_LOCATION, () -> Placeholders.forLocation(this.getBlockLocation()).apply((Placeholders.LOCATION_WORLD + ": " + Placeholders.LOCATION_X + ", " + Placeholders.LOCATION_Y + ", " + Placeholders.LOCATION_Z).replace(Placeholders.LOCATION_WORLD, LangManager.getWorld(this.getBlockLocation().getWorld()))));
     }
 
     @Override
@@ -107,10 +117,11 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
             this.getMembers().add(RegionMember.read(this.cfg, "Members.List." + sId));
         }
 
-//        for (String flagId : cfg.getSection("Flags")) {
-//            Set<Object> notAllowedData = new HashSet<>(cfg.getList( "Flags."+flagId+".Not_Allowed_Data", new ArrayList<>()));
-//            this.getFlags().put(flagId.toUpperCase(), notAllowedData);
-//        }
+        FlagsController flagsController = plugin.getFlagsController();
+        setFlags(flagsController.setupDefaultRegionFlags(new HashSet<>()));
+        for (String flagId : cfg.getSection("Flags")) {
+            RegionFlagSettings.read(flagsController, cfg, "Flags." + flagId);
+        }
         return true;
     }
 
@@ -132,20 +143,17 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
             member.write(cfg, "Members.List." + (i++));
         }
 
-//        for (Map.Entry<String, Set<Object>> entry  : this.getFlags().entrySet())  {
-//            cfg.set("Flags."+entry.getKey(), entry.getValue());
-//        }
+        getFlags().forEach(flag -> flag.write(cfg, "Flags." + flag.getFlag().getName()));
     }
 
     public void loadLocations() {
-        if (!this.getBlockLocation().isChunkLoaded()) {
-            this.getBlockLocation().getWorld().loadChunk(this.getBlockLocation().getChunk());
-        }
-        Block block = this.getBlockLocation().getBlock();
-        if (!block.getType().equals(regionBlock.getItem().getType()))
-            block.setType(regionBlock.getItem().getType());
-        regionBlock.updateHologram(this);
-        block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(this.plugin, this.getId()));
+        this.plugin.runTask(sync -> {
+            Block block = this.getBlockLocation().getBlock();
+            if (!block.getType().equals(regionBlock.getItem().getType()))
+                block.setType(regionBlock.getItem().getType());
+            regionBlock.updateHologram(this);
+            block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(this.plugin, this.getId()));
+        });
     }
 
     public void clear() {
@@ -153,7 +161,7 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         if (this.regionMenu != null)
             this.regionMenu.clear();
         if (this.membersMenu != null) {
-            this.membersMenu.clear();
+            plugin.runTask(sync -> this.membersMenu.clear());
         }
     }
 
@@ -172,6 +180,19 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
         return this.membersMenu;
     }
 
+    public boolean flagIsEnabled(@NotNull String flagId) {
+        return getFlags().stream().filter(f -> f.getFlag().getName().equals(flagId))
+                .map(RegionFlagSettings::isEnabled).findFirst().orElse(false);
+    }
+
+    public boolean flagIsEnabled(@NotNull Flag<?, ?> flag) {
+        return flagIsEnabled(flag.getName());
+    }
+
+    public Optional<RegionFlagSettings> getFlagSetting(@NotNull String flagId) {
+        return getFlags().stream().filter(f -> f.getFlag().getName().equals(flagId)).findFirst();
+    }
+
     public boolean isRegionBlock(@NotNull Block block) {
         MetadataValue metadataValue = block.hasMetadata(Keys.REGION_BLOCK.getKey()) ? block.getMetadata(Keys.REGION_BLOCK.getKey()).get(0) : null;
         return this.getBlockLocation().getBlock().equals(block) || metadataValue != null && metadataValue.asString().equals(this.getId());
@@ -187,27 +208,27 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
     }
 
     @Nullable
-    public RegionMember getMemberById(@NotNull UUID uuid) {
+    public RegionMember getMemberByUuid(@NotNull UUID uuid) {
         return this.getMembers().stream().filter(f -> f.getUuid().equals(uuid)).findFirst().orElse(null);
     }
 
     @Nullable
     public RegionMember getMemberByPlayer(@NotNull Player player) {
-        return this.getMemberById(player.getUniqueId());
+        return this.getMemberByUuid(player.getUniqueId());
     }
 
     public boolean isMember(@NotNull UUID id) {
-        return this.getMemberById(id) != null;
+        return this.getMemberByUuid(id) != null;
     }
 
 
     @NotNull
     public Collection<Player> getOnlineMembers() {
         return this.getMembers()
-                   .stream()
-                   .filter(founder -> founder.getPlayer() != null && founder.getPlayer().isOnline())
-                   .map(RegionMember::getPlayer)
-                   .collect(Collectors.toList());
+                .stream()
+                .filter(founder -> founder.getPlayer() != null && founder.getPlayer().isOnline())
+                .map(RegionMember::getPlayer)
+                .collect(Collectors.toList());
     }
 
     public Optional<Player> getOwnerPlayer() {
@@ -306,8 +327,8 @@ public class Region extends AbstractConfigHolder<ProtectionPlugin> implements Pl
 
     public void broadcast(@NotNull LangMessage... message) {
         this.getOnlineMembers().forEach(player -> Arrays.stream(message)
-                                                        .toList()
-                                                        .forEach(langMessage -> langMessage.send(player)));
+                .toList()
+                .forEach(langMessage -> langMessage.send(player)));
     }
 
     public void updateHologram(@NotNull Player player, boolean show) {

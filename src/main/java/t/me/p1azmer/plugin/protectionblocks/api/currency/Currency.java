@@ -17,8 +17,8 @@ public interface Currency extends Placeholder {
     @NotNull
     default String format(double price) {
         return this.replacePlaceholders().apply(this.getFormat())
-                   .replace(Placeholders.GENERIC_AMOUNT, this.formatValue(price))
-                   .replace(Placeholders.GENERIC_PRICE, this.formatValue(price));
+                .replace(Placeholders.GENERIC_AMOUNT, this.formatValue(price))
+                .replace(Placeholders.GENERIC_PRICE, this.formatValue(price));
     }
 
     @Nullable

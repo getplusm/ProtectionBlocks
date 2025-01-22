@@ -36,23 +36,23 @@ public class RGBlockBreakersListEditor extends EditorMenu<ProtectionPlugin, Regi
         this.addPreviousPage(36);
 
         this.addCreation(EditorLocales.REGION_BLOCK_BREAKERS_CREATE, 42)
-            .setClick((viewer, event) -> {
-                ItemStack cursor = event.getCursor();
-                if (!cursor.getType().isAir()) {
-                    List<RegionBreaker> breakers = new ArrayList<>(regionBlock.getBreakers());
-                    breakers.add(new RegionBreaker(cursor, RegionBreaker.foundDMGType(cursor.getType())));
-                    regionBlock.setBreakers(breakers);
-                    PlayerUtil.addItem(viewer.getPlayer(), cursor);
-                    event.getView().setCursor(null);
-                    this.save(viewer);
-                }
-            });
+                .setClick((viewer, event) -> {
+                    ItemStack cursor = event.getCursor();
+                    if (!cursor.getType().isAir()) {
+                        List<RegionBreaker> breakers = new ArrayList<>(regionBlock.getBreakers());
+                        breakers.add(new RegionBreaker(cursor, RegionBreaker.foundDMGType(cursor.getType())));
+                        regionBlock.setBreakers(breakers);
+                        PlayerUtil.addItem(viewer.getPlayer(), cursor);
+                        event.getView().setCursor(null);
+                        this.save(viewer);
+                    }
+                });
 
         this.addItem(Material.HOPPER, EditorLocales.REGION_BLOCK_BREAKERS_CLEAR, 38)
-            .setClick((viewer, event) -> {
-                regionBlock.getBreakers().clear();
-                this.save(viewer);
-            });
+                .setClick((viewer, event) -> {
+                    regionBlock.getBreakers().clear();
+                    this.save(viewer);
+                });
 
         this.getItems().forEach(menuItem -> {
             if (menuItem.getOptions().getDisplayModifier() == null) {

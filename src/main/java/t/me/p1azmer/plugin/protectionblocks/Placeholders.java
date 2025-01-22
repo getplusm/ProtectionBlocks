@@ -30,13 +30,16 @@ public class Placeholders extends t.me.p1azmer.engine.utils.Placeholders {
     public static final String REGION_CREATION_TIME = "%region_creation_time%";
     public static final String REGION_SIZE = "%region_size%";
     // flags
-    public static final String REGION_FLAGS = "%region_flags%";
     public static final String FLAG_NAME = "%flag_name%";
-    public static final String FLAG_VALUES = "%flag_values%";
+    public static final String FLAG_ENABLED = "%flag_enabled%";
+    public static final String FLAG_TRIGGER_BY_NON_MEMBERS = "%flag_trigger_by_non_members%";
+    public static final String FLAG_TRIGGER_ROLES = "%flag_trigger_roles%";
 
     // members
     public static final String MEMBER_JOIN_TIME = "%member_join_time%";
     public static final String MEMBER_NAME = "%member_name%";
+    public static final String MEMBER_ROLE_NAME = "%member_role_name%";
+    public static final String MEMBER_ROLE_PRIORITY = "%member_role_priority%";
 
     // region block
     public static final String REGION_BLOCK_ID = "%region_block_id%";

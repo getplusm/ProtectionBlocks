@@ -12,17 +12,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 class RegionEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private boolean cancelled = false;
     private final Region region;
+    private boolean cancelled = false;
+
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 
     @NotNull
     public Optional<Region> getRegion() {
         return Optional.ofNullable(this.region);
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
     }
 
     @Override
@@ -31,11 +30,12 @@ class RegionEvent extends Event implements Cancellable {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
-        return handlers;
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public @NotNull HandlerList getHandlers() {
         return handlers;
     }
 }

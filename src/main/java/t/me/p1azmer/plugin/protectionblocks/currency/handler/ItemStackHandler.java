@@ -14,13 +14,13 @@ public class ItemStackHandler implements CurrencyHandler {
         this.setItem(item);
     }
 
-    public void setItem(@NotNull ItemStack item) {
-        this.item = new ItemStack(item);
-    }
-
     @NotNull
     public ItemStack getItem() {
         return item;
+    }
+
+    public void setItem(@NotNull ItemStack item) {
+        this.item = new ItemStack(item);
     }
 
     @Override

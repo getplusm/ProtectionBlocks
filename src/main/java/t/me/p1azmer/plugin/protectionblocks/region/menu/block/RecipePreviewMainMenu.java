@@ -19,9 +19,9 @@ public class RecipePreviewMainMenu extends ConfigMenu<ProtectionPlugin> {
         super(regionBlock.plugin(), JYML.loadOrExtract(regionBlock.plugin(), "/menu/recipe_preview.gui.yml"));
         this.regionBlock = regionBlock;
         this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.RETURN, (viewer, event) -> regionBlock.getManager().getRecipePreviewListMenu().openAsync(viewer, 1))
-            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
-            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this));
+                .addClick(MenuItemType.RETURN, (viewer, event) -> regionBlock.getManager().getRecipePreviewListMenu().openAsync(viewer, 1))
+                .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
+                .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this));
         this.load();
 
         this.getItems().forEach(menuItem -> {
@@ -35,9 +35,9 @@ public class RecipePreviewMainMenu extends ConfigMenu<ProtectionPlugin> {
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
         regionBlock.getBlockRecipe().getSlotItemsMap().forEach((slot, itemStack) ->
-          this.addItem(
-            new MenuItem(itemStack).setPriority(101).setSlots(slot)
-          ));
+                this.addItem(
+                        new MenuItem(itemStack).setPriority(101).setSlots(slot)
+                ));
         this.addItem(new MenuItem(regionBlock.getItem()).setPriority(101).setSlots(24));
     }
 }

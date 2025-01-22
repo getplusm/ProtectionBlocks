@@ -49,17 +49,17 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     }
 
     @EventHandler
-    public void onRegionDelete(AsyncDeletedRegionEvent event){
+    public void onRegionDelete(AsyncDeletedRegionEvent event) {
         Set<Player> players = this.playerRegionMap.entrySet()
-                                                  .stream()
-                                                  .filter(f -> f.getValue().equals(event.getRegion()))
-                                                  .map(Map.Entry::getKey)
-                                                  .collect(Collectors.toSet());
+                .stream()
+                .filter(f -> f.getValue().equals(event.getRegion()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
         players.forEach(this.playerRegionMap::remove);
     }
 
     @EventHandler
-    public void onTeleportToRegion(PlayerTeleportEvent event){
+    public void onTeleportToRegion(PlayerTeleportEvent event) {
         Player player = event.getPlayer();
         handleRegionEnter(player, event.getTo());
     }
@@ -71,7 +71,7 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     }
 
     @EventHandler
-    public void onLoginToRegion(PlayerJoinEvent event){
+    public void onLoginToRegion(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         handleRegionEnter(player, player.getLocation());
     }
@@ -126,18 +126,18 @@ public class PlayerListener extends AbstractListener<ProtectionPlugin> {
     @EventHandler(priority = EventPriority.LOW)
     public void onRegionEnter(PlayerEnterRegionEvent event) {
         event.getRegion().ifPresent(region ->
-          plugin.getMessage(Lang.REGION_ENTER_NOTIFY)
-                .replace(region.replacePlaceholders())
-                .send(event.getPlayer())
+                plugin.getMessage(Lang.REGION_ENTER_NOTIFY)
+                        .replace(region.replacePlaceholders())
+                        .send(event.getPlayer())
         );
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onRegionLeave(PlayerExitRegionEvent event) {
         event.getRegion().ifPresent(region ->
-          plugin.getMessage(Lang.REGION_EXIT_NOTIFY)
-                .replace(region.replacePlaceholders())
-                .send(event.getPlayer())
+                plugin.getMessage(Lang.REGION_EXIT_NOTIFY)
+                        .replace(region.replacePlaceholders())
+                        .send(event.getPlayer())
         );
     }
 

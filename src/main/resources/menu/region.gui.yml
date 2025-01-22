@@ -15,7 +15,17 @@ Content:
       Material: PLAYER_HEAD
       Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==
       Name: '#FF5733(✕) &lExit'
-
+  flags:
+    Item:
+      Material: WARPED_FENCE_GATE
+      Name: '#ee9aff&lFlags'
+      Lore:
+        - '#ddeceeRegion flags'
+        - ''
+        - '#9af7ff&lActions:'
+        - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange'
+    Slots: 4
+    Type: FLAGS
   members:
     Item:
       Material: PLAYER_HEAD

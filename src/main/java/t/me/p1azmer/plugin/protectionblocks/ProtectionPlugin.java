@@ -1,6 +1,8 @@
 package t.me.p1azmer.plugin.protectionblocks;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 import t.me.p1azmer.engine.NexPlugin;
 import t.me.p1azmer.engine.Version;
@@ -21,16 +23,23 @@ import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramDecent
 import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramDisplaysHandler;
 import t.me.p1azmer.plugin.protectionblocks.integration.holograms.HologramFancyHandler;
 import t.me.p1azmer.plugin.protectionblocks.region.RegionManager;
+import t.me.p1azmer.plugin.protectionblocks.region.flags.FlagsController;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.block.DamageType;
 
-@Getter
-public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements UserDataHolder<ProtectionPlugin, RegionUser> {
-    private DataHandler data;
-    private UserManager userManager;
+import java.util.logging.Logger;
 
-    private RegionManager regionManager;
-    private HologramHandler hologramHandler;
-    private CurrencyManager currencyManager;
+@Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements UserDataHolder<ProtectionPlugin, RegionUser> {
+    @Getter
+    static Logger log;
+    DataHandler data;
+    UserManager userManager;
+
+    RegionManager regionManager;
+    HologramHandler hologramHandler;
+    CurrencyManager currencyManager;
+    FlagsController flagsController;
 
     @Override
     protected @NotNull ProtectionPlugin getSelf() {
@@ -39,13 +48,17 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements Use
 
     @Override
     public void enable() {
-        this.setupHologramHandler();
+        log = getLogger();
+        setupHologramHandler();
 
-        this.currencyManager = new CurrencyManager(this);
-        this.currencyManager.setup();
+        flagsController = new FlagsController(this);
+        flagsController.setup();
 
-        this.regionManager = new RegionManager(this);
-        this.regionManager.setup();
+        currencyManager = new CurrencyManager(this);
+        currencyManager.setup();
+
+        regionManager = new RegionManager(this);
+        regionManager.setup();
     }
 
     @Override
@@ -62,6 +75,9 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements Use
             this.currencyManager.shutdown();
             this.currencyManager = null;
         }
+        if (flagsController != null) {
+            flagsController.shutdown();
+        }
     }
 
     private void setupHologramHandler() {
@@ -72,7 +88,7 @@ public class ProtectionPlugin extends NexPlugin<ProtectionPlugin> implements Use
         } else if (EngineUtils.hasPlugin("DecentHolograms")) {
             this.hologramHandler = new HologramDecentHandler();
             this.hologramHandler.setup();
-        } else if (EngineUtils.hasPlugin("FancyHolograms") && Version.isAbove(Version.V1_19_R2)){
+        } else if (EngineUtils.hasPlugin("FancyHolograms") && Version.isAbove(Version.V1_19_R2)) {
             this.hologramHandler = new HologramFancyHandler();
             this.hologramHandler.setup();
         }

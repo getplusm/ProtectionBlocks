@@ -5,7 +5,6 @@ import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import t.me.p1azmer.engine.utils.LocationUtil;
 import t.me.p1azmer.plugin.protectionblocks.api.integration.HologramHandler;
 import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
@@ -45,7 +44,7 @@ public class HologramDecentHandler implements HologramHandler {
 
     @NotNull
     private Location fineLocation(@NotNull Location location) {
-        return LocationUtil.getCenter(location.clone()).add(0D, Config.REGION_HOLOGRAM_Y_OFFSET.get(), 0D);
+        return location.toCenterLocation().add(0D, Config.REGION_HOLOGRAM_Y_OFFSET.get(), 0D);
     }
 
     @Override

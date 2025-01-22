@@ -1,9 +1,12 @@
 package t.me.p1azmer.plugin.protectionblocks.region;
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,7 +19,6 @@ import t.me.p1azmer.engine.Version;
 import t.me.p1azmer.engine.api.config.JYML;
 import t.me.p1azmer.engine.api.manager.AbstractManager;
 import t.me.p1azmer.engine.utils.StringUtil;
-import t.me.p1azmer.engine.utils.wrapper.UniParticle;
 import t.me.p1azmer.plugin.protectionblocks.Keys;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
 import t.me.p1azmer.plugin.protectionblocks.api.events.AsyncCreatedRegionEvent;
@@ -34,73 +36,71 @@ import t.me.p1azmer.plugin.protectionblocks.region.menu.block.RecipePreviewListM
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+@Getter
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RegionManager extends AbstractManager<ProtectionPlugin> {
-    private final Map<String, Region> regionMap = new ConcurrentHashMap<>();
-    private final Map<String, RegionBlock> regionBlockMap = new ConcurrentHashMap<>();
-    private final AsyncLoadingCache<Location, Region> locationCache;
+    Map<String, Region> regionMap = new ConcurrentHashMap<>();
+    Map<String, RegionBlock> regionBlockMap = new ConcurrentHashMap<>();
+    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    LoadingCache<Location, Region> locationCache;
 
-    private RGListEditor editor;
-    private RecipePreviewListMenu recipePreviewListMenu;
+    @NonFinal
+    RGListEditor editor;
+    @NonFinal
+    RecipePreviewListMenu recipePreviewListMenu;
 
     public RegionManager(@NotNull ProtectionPlugin plugin) {
         super(plugin);
         this.locationCache = Caffeine.newBuilder()
-                                     .refreshAfterWrite(30, TimeUnit.SECONDS)
-                                     .buildAsync((location, executor) ->
-                                       CompletableFuture.completedFuture(
-                                         regionMap.values()
-                                                  .stream()
-                                                  .filter(f ->
-                                                    f.getBlockLocation().equals(location)
-                                                      || f.isRegionBlock(location.getBlock())
-                                                      || f.getCuboid().contains(location)
-                                                  )
-                                                  .findFirst()
-                                                  .orElse(null)
-                                       ).exceptionally(throwable -> {
-                                           throwable.printStackTrace();
-                                           return null;
-                                       }));
+                .refreshAfterWrite(30, TimeUnit.SECONDS)
+                .build(location -> regionMap.values().stream().filter(f ->
+                        f.getBlockLocation().equals(location)
+                                || f.isRegionBlock(location.getBlock())
+                                || f.getCuboid().contains(location)
+                ).findFirst().orElse(null));
     }
 
     @Override
-    @SuppressWarnings("CallToPrintStackTrace")
     protected void onLoad() {
-        CompletableFuture.runAsync(() -> {
-            for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + Config.REGION_BLOCKS_DIR, true)) {
-                RegionBlock regionBlock = new RegionBlock(this, cfg);
-                if (regionBlock.load()) {
-                    this.regionBlockMap.put(regionBlock.getId(), regionBlock);
-                    regionBlock.getBlockRecipe().setup();
+        scheduler.execute(() -> {
+            try {
+                for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + Config.REGION_BLOCKS_DIR, true)) {
+                    RegionBlock regionBlock = new RegionBlock(this, cfg);
+                    if (regionBlock.load()) {
+                        this.regionBlockMap.put(regionBlock.getId(), regionBlock);
+                        regionBlock.getBlockRecipe().setup();
 
-                    if (Version.isAbove(Version.V1_20_R1)) Bukkit.updateRecipes();
+                        if (Version.isAbove(Version.V1_20_R1)) Bukkit.updateRecipes();
 
-                } else {
-                    this.plugin.error("Region Block not loaded '" + cfg.getFile().getName() + "'");
+                    } else {
+                        this.plugin.error("Region Block not loaded '" + cfg.getFile().getName() + "'");
+                    }
                 }
-            }
-            this.plugin.info("Region Blocks Loaded: " + this.getRegionBlocks().size());
-        }).thenAccept(__ -> {
-            // TODO: rewrite to database
-            for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + Config.REGION_DIR, true)) {
-                Region region = new Region(this, cfg);
-                if (region.load()) {
-                    this.regionMap.put(region.getId(), region);
-                    this.plugin.runTask(sync -> region.loadLocations());
-                } else {
-                    this.plugin.error("Region not loaded '" + cfg.getFile().getName() + "'");
+                this.plugin.info("Region Blocks Loaded: " + this.getRegionBlocks().size());
+
+                // TODO: rewrite to database
+                for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + Config.REGION_DIR, true)) {
+                    Region region = new Region(this, cfg);
+                    if (region.load()) {
+                        this.regionMap.put(region.getId(), region);
+                        region.loadLocations();
+                    } else {
+                        this.plugin.error("Region not loaded '" + cfg.getFile().getName() + "'");
+                    }
                 }
+                this.plugin.info("Regions Loaded: " + this.getRegionMap().size());
+            } catch (RuntimeException exception) {
+                ProtectionPlugin.getLog().log(Level.SEVERE, "Got exception while loading regions", exception);
             }
-            this.plugin.info("Regions Loaded: " + this.getRegionMap().size());
-        }).exceptionally(throwable -> {
-            throwable.printStackTrace();
-            return null;
         });
 
         this.editor = new RGListEditor(this);
@@ -109,7 +109,6 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     }
 
     @Override
-    @SuppressWarnings("CallToPrintStackTrace")
     protected void onShutdown() {
         if (this.editor != null) {
             this.editor.clear();
@@ -118,16 +117,32 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         if (this.recipePreviewListMenu != null) {
             this.recipePreviewListMenu.clear();
         }
-        CompletableFuture.runAsync(() -> {
-            this.getRegions().forEach(Region::clear);
-            this.getRegionMap().clear();
+        scheduler.execute(() -> {
+            try {
+                ProtectionPlugin.getLog().info("Saving and cleanup regions");
+                this.getRegions().forEach(Region::clear);
+                this.getRegionMap().clear();
 
-            this.getRegionBlocks().forEach(RegionBlock::clear);
-            this.getRegionBlocks().clear();
-        }).exceptionally(throwable -> {
-            throwable.printStackTrace();
-            return null;
+                this.getRegionBlocks().forEach(RegionBlock::clear);
+                this.getRegionBlocks().clear();
+            } catch (RuntimeException exception) {
+                ProtectionPlugin.getLog().log(Level.SEVERE, "Got exception while saving regions", exception);
+            }
         });
+
+        shutdownScheduler();
+    }
+
+    private void shutdownScheduler() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     @NotNull
@@ -145,11 +160,6 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     }
 
     @NotNull
-    public Map<String, RegionBlock> getRegionBlockMap() {
-        return regionBlockMap;
-    }
-
-    @NotNull
     public Collection<RegionBlock> getRegionBlocks() {
         return this.getRegionBlockMap().values();
     }
@@ -157,20 +167,15 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     @Nullable
     public RegionBlock getRegionBlockByItem(@NotNull ItemStack item) {
         return this.getRegionBlocks()
-                   .stream()
-                   .filter(f -> f.getItem().isSimilar(item))
-                   .findFirst()
-                   .orElse(null);
+                .stream()
+                .filter(f -> f.getItem().isSimilar(item))
+                .findFirst()
+                .orElse(null);
     }
 
     @Nullable
     public RegionBlock getRegionBlockById(@NotNull String id) {
         return getRegionBlockMap().get(id);
-    }
-
-    @NotNull
-    public Map<String, Region> getRegionMap() {
-        return regionMap;
     }
 
     @NotNull
@@ -181,14 +186,22 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     @NotNull
     public Collection<Region> getRegionsWithBlocks(@NotNull RegionBlock block) {
         return this.getRegions()
-                   .stream()
-                   .filter(f -> f.getRegionBlockId().equals(block.getId()))
-                   .collect(Collectors.toList());
+                .stream()
+                .filter(f -> f.getRegionBlockId().equals(block.getId()))
+                .collect(Collectors.toList());
     }
 
     @Nullable
     public Region getRegionByLocation(@NotNull Location location) {
-        return this.locationCache.synchronous().get(location);
+        return this.locationCache.get(location);
+    }
+
+    public Optional<Region> getOptionalRegionByBlock(@NotNull Block block) {
+        return Optional.ofNullable(getRegionByBlock(block));
+    }
+
+    public Optional<Region> getOptionalRegionByLocation(@NotNull Location location) {
+        return Optional.ofNullable(getRegionByLocation(location));
     }
 
     @Nullable
@@ -198,11 +211,7 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
 
     @Nullable
     public Region getRegionById(@NotNull String id) {
-        return this.getRegions()
-                   .stream()
-                   .filter(region -> region.getId().equalsIgnoreCase(id))
-                   .findFirst()
-                   .orElse(null);
+        return this.getRegions().stream().filter(region -> region.getId().equalsIgnoreCase(id)).findFirst().orElse(null);
     }
 
     public boolean isProtectedBlock(@NotNull Block block) {
@@ -228,13 +237,9 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
         return true;
     }
 
-    @SuppressWarnings("CallToPrintStackTrace")
-    public boolean tryCreateRegion(
-      @NotNull Player player,
-      @NotNull Block block,
-      @NotNull ItemStack item,
-      @NotNull RegionBlock regionBlock
-    ) {
+    public boolean tryCreateRegion(@NotNull Player player,
+                                   @NotNull Block block, @NotNull ItemStack item,
+                                   @NotNull RegionBlock regionBlock) {
         RegionUser regionUser = plugin.getUserManager().getUserData(player);
         Region region = this.getRegionByBlock(block);
         if (region != null && !region.isAllowed(player) || !regionBlock.getWorlds().contains(block.getWorld().getName())) {
@@ -259,85 +264,71 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
             }
         }
 
-        CompletableFuture.runAsync(() ->
-                           this.createRegion(player, block, regionBlock)
-                         )
-                         .exceptionally(throwable -> {
-                             throwable.printStackTrace();
-                             return null;
-                         });
-        ;
+        scheduler.execute(() -> {
+            try {
+                this.createRegion(player, block, regionBlock);
+            } catch (RuntimeException exception) {
+                ProtectionPlugin.getLog().log(Level.SEVERE, "Failed to create region", exception);
+            }
+        });
+
         return true;
     }
 
     public void createRegion(@NotNull Player player, @NotNull Block block, @NotNull RegionBlock regionBlock) {
-        AsyncCreatedRegionEvent calledEvent = new AsyncCreatedRegionEvent(block);
-        Bukkit.getPluginManager().callEvent(calledEvent);
+        try {
+            AsyncCreatedRegionEvent calledEvent = new AsyncCreatedRegionEvent(block);
+            Bukkit.getPluginManager().callEvent(calledEvent);
 
-        boolean eventCancelled = calledEvent.isCancelled();
-        if (eventCancelled) {
-            if (calledEvent.isNotifyIfCancelled())
-                this.plugin.getMessage(Lang.REGION_CREATE_CANCELLED_VIA_EVENT).send(player);
-            return;
-        }
-
-        String fileName = UUID.randomUUID()
-                              .toString()
-                              .substring(0, 7)
-                              .replace("-", "") + "-" + (this.getRegions().size() + 1) + ".yml";
-        JYML cfg = new JYML(this.plugin.getDataFolder() + Config.REGION_DIR, fileName);
-        Region region = new Region(this, cfg);
-
-        region.setRegionBlockAndId(regionBlock);
-        region.setOwner(player);
-        if (regionBlock.getLifeTime() != null && regionBlock.isLifeTimeEnabled())
-            region.setLastDeposit(System.currentTimeMillis() + regionBlock.getLifeTime().getGreatest(player) * 1000L);
-        else
-            region.setLastDeposit(-1);
-        region.setBlockLocation(block.getLocation(), regionBlock, player);
-        region.setBlockHealth(regionBlock.getStrength());
-        region.save();
-        this.locationCache.synchronous().put(block.getLocation(), region);
-
-        this.getRegionMap().put(region.getId(), region);
-
-        block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(plugin, region.getId()));
-
-        if (Config.ENABLE_PARTICLE_WHEN_CREATE.get()) {
-            // small & pretty effect
-            Location loc = block.getLocation().clone().add(0.5, -0.8D, 0.5);
-            for (int step = 0; step < 170 / 5; ++step) {
-                for (int boost = 0; boost < 3; boost++) {
-                    for (int strand = 1; strand <= 2; ++strand) {
-                        float progress = step / (float) (170 / 5);
-                        double point = 2.0F * progress * 2.0f * Math.PI / 2 + 6.283185307179586 * strand / 2 + 0.7853981633974483D;
-                        double addX = Math.cos(point) * progress * 1.5F;
-                        double addZ = Math.sin(point) * progress * 1.5F;
-                        double addY = 3.5D - 0.02 * 5 * step;
-                        Location location = loc.clone().add(addX, addY, addZ);
-                        UniParticle.redstone(Color.LIME, 1).play(location, 0.1f, 0.0f, 1);
-                    }
-                }
+            boolean eventCancelled = calledEvent.isCancelled();
+            if (eventCancelled) {
+                if (calledEvent.isNotifyIfCancelled())
+                    this.plugin.getMessage(Lang.REGION_CREATE_CANCELLED_VIA_EVENT).send(player);
+                return;
             }
-        }
 
-        regionBlock.updateHologram(region);
-        if (regionBlock.isLifeTimeEnabled()) {
-            plugin.getMessage(Lang.REGION_SUCCESS_CREATED_WITH_LIFE_TIME)
-                  .replace(regionBlock.replacePlaceholders())
-                  .replace(region.replacePlaceholders())
-                  .send(player);
-        } else {
-            plugin.getMessage(Lang.REGION_SUCCESS_CREATED)
-                  .replace(regionBlock.replacePlaceholders())
-                  .replace(region.replacePlaceholders())
-                  .send(player);
-        }
+            String fileName = UUID.randomUUID()
+                    .toString()
+                    .substring(0, 7)
+                    .replace("-", "") + "-" + (this.getRegions().size() + 1) + ".yml";
+            JYML cfg = new JYML(this.plugin.getDataFolder() + Config.REGION_DIR, fileName);
+            Region region = new Region(this, cfg);
 
-        plugin.getUserManager().getUserDataAndPerform(player.getUniqueId(), regionUser -> {
-            regionUser.addRegion(region, regionBlock);
-            plugin.getUserManager().saveUser(regionUser);
-        });
+            region.setRegionBlockAndId(regionBlock);
+            region.setOwner(player);
+            if (regionBlock.getLifeTime() != null && regionBlock.isLifeTimeEnabled())
+                region.setLastDeposit(System.currentTimeMillis() + regionBlock.getLifeTime().getGreatest(player) * 1000L);
+            else
+                region.setLastDeposit(-1);
+            region.setBlockLocation(block.getLocation(), regionBlock, player);
+            region.setBlockHealth(regionBlock.getStrength());
+            region.save();
+            this.locationCache.put(block.getLocation(), region);
+
+            this.getRegionMap().put(region.getId(), region);
+
+            block.setMetadata(Keys.REGION_BLOCK.getKey(), new FixedMetadataValue(plugin, region.getId()));
+
+            regionBlock.updateHologram(region);
+            if (regionBlock.isLifeTimeEnabled()) {
+                plugin.getMessage(Lang.REGION_SUCCESS_CREATED_WITH_LIFE_TIME)
+                        .replace(regionBlock.replacePlaceholders())
+                        .replace(region.replacePlaceholders())
+                        .send(player);
+            } else {
+                plugin.getMessage(Lang.REGION_SUCCESS_CREATED)
+                        .replace(regionBlock.replacePlaceholders())
+                        .replace(region.replacePlaceholders())
+                        .send(player);
+            }
+
+            plugin.getUserManager().getUserDataAndPerform(player.getUniqueId(), regionUser -> {
+                regionUser.addRegion(region, regionBlock);
+                plugin.getUserManager().saveUser(regionUser);
+            });
+        }catch (RuntimeException exception){
+            ProtectionPlugin.getLog().log(Level.SEVERE, "Failed to create region", exception);
+        }
     }
 
     public boolean deleteRegionBlock(@NotNull RegionBlock regionBlock) {
@@ -350,38 +341,35 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
     }
 
     public void deleteRegion(@NotNull Region region, boolean notify) {
-        CompletableFuture.runAsync(() -> {
-            if (!region.getFile().delete()) return;
-            AsyncDeletedRegionEvent calledEvent = new AsyncDeletedRegionEvent(region);
-            Bukkit.getPluginManager().callEvent(calledEvent);
-            if (calledEvent.isCancelled()) {
-                if (calledEvent.isNotifyIfCancelled()) {
-                    region.getOwnerPlayer()
-                          .ifPresent(player -> this.plugin.getMessage(Lang.REGION_CREATE_CANCELLED_VIA_EVENT)
-                                                          .send(player));
+        if (!region.getFile().delete()) return;
+
+        scheduler.execute(() -> {
+            try {
+                AsyncDeletedRegionEvent calledEvent = new AsyncDeletedRegionEvent(region);
+                Bukkit.getPluginManager().callEvent(calledEvent);
+                if (calledEvent.isCancelled()) {
+                    if (calledEvent.isNotifyIfCancelled()) {
+                        region.getOwnerPlayer()
+                                .ifPresent(player -> this.plugin.getMessage(Lang.REGION_CREATE_CANCELLED_VIA_EVENT)
+                                        .send(player));
+                    }
+                    return;
                 }
-                return;
-            }
-            this.getRegionMap().remove(region.getId(), region);
-            region.clear();
-            this.locationCache.synchronous().invalidate(region.getBlockLocation());
-            if (notify) {
-                region.broadcast(plugin.getMessage(Lang.REGION_DESTROY_NOTIFY)
-                                       .replace(region.replacePlaceholders())
-                                       .replace(region.getRegionBlock().replacePlaceholders()));
-            }
-            for (int step = 0; step < 36; ++step) {
-                Location loc = region.getBlockLocation().clone().add(0.5, -0.8D, 0.5);
-                double n2 = (0.5 + step * 0.15) % 3.0;
-                for (int n3 = 0; n3 < n2 * 10.0; ++n3) {
-                    double n4 = 6.283185307179586 / (n2 * 10.0) * n3;
-                    UniParticle.redstone(Color.RED, 1).play(getPointOnCircle(loc.clone(), n4, n2, 1.0), 0.1f, 0.0f, 2);
+                this.getRegionMap().remove(region.getId(), region);
+                region.clear();
+                this.locationCache.invalidate(region.getBlockLocation());
+                if (notify) {
+                    region.broadcast(plugin.getMessage(Lang.REGION_DESTROY_NOTIFY)
+                            .replace(region.replacePlaceholders())
+                            .replace(region.getRegionBlock().replacePlaceholders()));
                 }
+                plugin.getUserManager().getUserDataAndPerform(region.getOwnerUUID(), regionUser -> {
+                    regionUser.removeRegion(region);
+                    plugin.getUserManager().saveUser(regionUser);
+                });
+            } catch (RuntimeException exception) {
+                ProtectionPlugin.getLog().log(Level.SEVERE, "Failed to delete region", exception);
             }
-            plugin.getUserManager().getUserDataAndPerform(region.getOwnerUUID(), regionUser -> {
-                regionUser.removeRegion(region);
-                plugin.getUserManager().saveUser(regionUser);
-            });
         });
     }
 
@@ -406,23 +394,23 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
                 if (notify) {
                     if (player != null) {
                         plugin.getMessage(Lang.REGION_SUCCESS_DESTROY_TARGET)
-                              .replace(region.replacePlaceholders())
-                              .replace(regionBlock.replacePlaceholders())
-                              .send(player);
+                                .replace(region.replacePlaceholders())
+                                .replace(regionBlock.replacePlaceholders())
+                                .send(player);
                     }
                     region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DESTROY_SELF)
-                                           .replace(region.replacePlaceholders())
-                                           .replace(regionBlock.replacePlaceholders()));
+                            .replace(region.replacePlaceholders())
+                            .replace(regionBlock.replacePlaceholders()));
                 }
             }
         }
         if (notify) {
             region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DAMAGED_SELF)
-                                   .replace(region.replacePlaceholders()));
+                    .replace(region.replacePlaceholders()));
             if (player != null)
                 plugin.getMessage(Lang.REGION_SUCCESS_DAMAGED_TARGET)
-                      .replace(region.replacePlaceholders())
-                      .send(player);
+                        .replace(region.replacePlaceholders())
+                        .send(player);
         }
         return true;
     }
@@ -438,8 +426,8 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
             boolean allowed = this.tryDamageRegion(player, blockOrItem, targetBlock, region, damageType, true);
             if (!allowed) {
                 this.plugin.getMessage(Lang.REGION_ERROR_BREAK)
-                           .replace(region.replacePlaceholders())
-                           .send(player);
+                        .replace(region.replacePlaceholders())
+                        .send(player);
             }
             return allowed;
         }
@@ -447,7 +435,7 @@ public class RegionManager extends AbstractManager<ProtectionPlugin> {
             this.deleteRegion(region, false);
 
             region.broadcast(plugin.getMessage(Lang.REGION_SUCCESS_DESTROY_SELF)
-                                   .replace(region.replacePlaceholders()));
+                    .replace(region.replacePlaceholders()));
             targetBlock.breakNaturally(new ItemStack(Material.AIR));
             RegionBlock regionBlock = region.getRegionBlock();
             targetBlock.getWorld().dropItem(targetBlock.getLocation(), regionBlock.getItem());

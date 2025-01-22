@@ -16,20 +16,19 @@ import t.me.p1azmer.plugin.protectionblocks.api.currency.CurrencyHandler;
 
 public class ConfigCurrency extends AbstractConfigHolder<ProtectionPlugin> implements Currency {
 
+    private final CurrencyHandler handler;
+    private final PlaceholderMap placeholderMap;
     private String name;
     private String format;
     private ItemStack icon;
-
-    private final CurrencyHandler handler;
-    private final PlaceholderMap placeholderMap;
 
     public ConfigCurrency(@NotNull ProtectionPlugin plugin, @NotNull JYML cfg, @NotNull CurrencyHandler handler) {
         super(plugin, cfg);
         this.handler = handler;
 
         this.placeholderMap = new PlaceholderMap()
-          .add(Placeholders.CURRENCY_ID, this::getId)
-          .add(Placeholders.CURRENCY_NAME, this::getName);
+                .add(Placeholders.CURRENCY_ID, this::getId)
+                .add(Placeholders.CURRENCY_NAME, this::getName);
     }
 
     @Override

@@ -26,20 +26,20 @@ public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
     private static final ItemStack RETURN_ITEM = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTM4NTJiZjYxNmYzMWVkNjdjMzdkZTRiMGJhYTJjNWY4ZDhmY2E4MmU3MmRiY2FmY2JhNjY5NTZhODFjNCJ9fX0=");
     private static final ItemStack CLEAR_ITEM = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2UxNzkzMmUwMTQyMjUzMTY1MzczOWQzYmVjZmJiNWNmNzhmNWY3NmEzZDdiNzY5ZTJmNjYxZjUyYzJhZjJkYSJ9fX0=");
     private static final int[] craftingSlots = new int[]{
-      10, 11, 12,
-      19, 20, 21,
-      28, 29, 30
+            10, 11, 12,
+            19, 20, 21,
+            28, 29, 30
     };
 
     static {
         ItemReplacer.create(RETURN_ITEM)
-                    .readLocale(RETURN)
-                    .hideFlags()
-                    .writeMeta();
+                .readLocale(RETURN)
+                .hideFlags()
+                .writeMeta();
         ItemReplacer.create(CLEAR_ITEM)
-                    .readLocale(REGION_BLOCK_RECIPE_CLEAR)
-                    .hideFlags()
-                    .writeMeta();
+                .readLocale(REGION_BLOCK_RECIPE_CLEAR)
+                .hideFlags()
+                .writeMeta();
     }
 
     private final RegionBlock regionBlock;
@@ -50,35 +50,35 @@ public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
         int[] emptySlots = IntStream.range(0, 54).toArray();
         ItemStack blockItem = regionBlock.getItem();
         ItemReplacer.create(blockItem)
-                    .readLocale(REGION_BLOCK_RECIPE_BLOCK_ITEM)
-                    .hideFlags()
-                    .writeMeta();
+                .readLocale(REGION_BLOCK_RECIPE_BLOCK_ITEM)
+                .hideFlags()
+                .writeMeta();
         this.addItem(new MenuItem(new ItemStack(Material.BLACK_STAINED_GLASS_PANE)).setSlots(emptySlots).setPriority(0))
-            .getOptions()
-            .setDisplayModifier((viewer, itemStack) -> ItemReplacer.create(itemStack)
-                                                                   .setDisplayName(" ")
-                                                                   .writeMeta()
-            );
+                .getOptions()
+                .setDisplayModifier((viewer, itemStack) -> ItemReplacer.create(itemStack)
+                        .setDisplayName(" ")
+                        .writeMeta()
+                );
 
         this.addItem(new MenuItem(blockItem).setPriority(100).setSlots(24));
 
         this.addItem(RETURN_ITEM)
-            .setSlots(49)
-            .setPriority(100)
-            .setClick((viewer, inventoryClickEvent) -> regionBlock.getEditor().openAsync(viewer.getPlayer(), 1));
+                .setSlots(49)
+                .setPriority(100)
+                .setClick((viewer, inventoryClickEvent) -> regionBlock.getEditor().openAsync(viewer.getPlayer(), 1));
 
         this.addItem(CLEAR_ITEM)
-            .setSlots(47)
-            .setPriority(100)
-            .setClick((viewer, inventoryClickEvent) -> {
-                regionBlock.getBlockRecipe().setSlotItemsMap(new LinkedHashMap<>());
-                this.save(viewer);
-            });
+                .setSlots(47)
+                .setPriority(100)
+                .setClick((viewer, inventoryClickEvent) -> {
+                    regionBlock.getBlockRecipe().setSlotItemsMap(new LinkedHashMap<>());
+                    this.save(viewer);
+                });
     }
 
     private void save(@NotNull MenuViewer viewer) {
         this.regionBlock.save();
-        this.plugin.runTaskLater(task -> this.open(viewer.getPlayer(), viewer.getPage()), 20);
+        this.plugin.runTask(task -> this.open(viewer.getPlayer(), viewer.getPage()));
     }
 
 
@@ -89,27 +89,27 @@ public class RGBlockRecipeEditor extends Menu<ProtectionPlugin> {
 
         new LinkedHashMap<>(regionBlock.getBlockRecipe().getSlotItemsMap()).forEach((slot, itemStack) -> {
             MenuItem menuItem = new MenuItem(itemStack).setPriority(101)
-                                                       .setSlots(slot)
-                                                       .setClick((menuViewer, inventoryClickEvent) -> {
-                                                           if (inventoryClickEvent.getClick().equals(ClickType.RIGHT)) {
-                                                               PlayerUtil.addItem(menuViewer.getPlayer(), itemStack);
-                                                           }
-                                                       });
+                    .setSlots(slot)
+                    .setClick((menuViewer, inventoryClickEvent) -> {
+                        if (inventoryClickEvent.getClick().equals(ClickType.RIGHT)) {
+                            PlayerUtil.addItem(menuViewer.getPlayer(), itemStack);
+                        }
+                    });
             this.addItem(menuItem)
-                .getOptions()
-                .setDisplayModifier((menuViewer, itemStack1) -> {
-                    if (itemStack1.getType().isAir()) {
-                        itemStack1.setType(Material.GRAY_STAINED_GLASS_PANE);
-                        ItemReplacer.create(itemStack1)
+                    .getOptions()
+                    .setDisplayModifier((menuViewer, itemStack1) -> {
+                        if (itemStack1.getType().isAir()) {
+                            itemStack1.setType(Material.GRAY_STAINED_GLASS_PANE);
+                            ItemReplacer.create(itemStack1)
                                     .readLocale(REGION_BLOCK_RECIPE_ITEM)
                                     .setDisplayName(Colors2.WHITE + "AIR").replace(Colorizer::apply).writeMeta();
-                        menuItem.setPriority(100);
-                    } else {
-                        ItemReplacer.create(itemStack1)
+                            menuItem.setPriority(100);
+                        } else {
+                            ItemReplacer.create(itemStack1)
                                     .readLocale(REGION_BLOCK_RECIPE_ITEM)
                                     .writeMeta();
-                    }
-                });
+                        }
+                    });
         });
     }
 

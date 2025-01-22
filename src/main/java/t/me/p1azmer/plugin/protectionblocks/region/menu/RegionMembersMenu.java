@@ -1,5 +1,7 @@
 package t.me.p1azmer.plugin.protectionblocks.region.menu;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -18,18 +20,20 @@ import t.me.p1azmer.engine.utils.ItemUtil;
 import t.me.p1azmer.engine.utils.PlayerUtil;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
 import t.me.p1azmer.plugin.protectionblocks.ProtectionPlugin;
+import t.me.p1azmer.plugin.protectionblocks.config.Config;
 import t.me.p1azmer.plugin.protectionblocks.config.Lang;
 import t.me.p1azmer.plugin.protectionblocks.region.impl.Region;
-import t.me.p1azmer.plugin.protectionblocks.region.impl.RegionMember;
+import t.me.p1azmer.plugin.protectionblocks.region.members.RegionMember;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RegionMembersMenu extends ConfigMenu<ProtectionPlugin> implements AutoPaged<RegionMember> {
-    private final int[] slots;
-    private final String previewName;
-    private final List<String> previewLore;
-    private final Region region;
+    int[] slots;
+    String previewName;
+    List<String> previewLore;
+    Region region;
 
     public RegionMembersMenu(@NotNull Region region) {
         super(region.plugin(), JYML.loadOrExtract(region.plugin(), "/menu/region.members.gui.yml"));
@@ -39,32 +43,32 @@ public class RegionMembersMenu extends ConfigMenu<ProtectionPlugin> implements A
         this.previewLore = cfg.getStringList("Preview.Lore");
 
         this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
-            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
-            .addClick(MenuItemType.RETURN, (viewer, event) -> region.getRegionMenu().openAsync(viewer, 1));
+                .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
+                .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
+                .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
+                .addClick(MenuItemType.RETURN, (viewer, event) -> region.getRegionMenu().openAsync(viewer, 1));
 
         this.registerHandler(Special.class)
-            .addClick(Special.ADD_MEMBER, (viewer, event) -> {
-                EditorManager.prompt(viewer.getPlayer(), plugin().getMessage(Lang.Editor_Region_Enter_Player_name).getLocalized());
-                EditorManager.startEdit(viewer.getPlayer(), wrapper -> {
-                    String playerName = wrapper.getTextRaw();
-                    Player player = PlayerUtil.getPlayer(playerName);
-                    if (player == null) {
-                        EditorManager.error(viewer.getPlayer(), plugin().getMessage(Lang.Editor_Region_Members_Player_NF).getLocalized());
-                        return false;
-                    }
-                    if (region.isAllowed(player)) {
-                        EditorManager.error(viewer.getPlayer(), plugin().getMessage(Lang.Editor_Region_Members_Player_Already).getLocalized());
-                        return false;
-                    }
-                    region.addMember(player);
-                    region.save();
-                    this.openAsync(viewer, 1);
-                    return true;
+                .addClick(Special.ADD_MEMBER, (viewer, event) -> {
+                    EditorManager.prompt(viewer.getPlayer(), plugin().getMessage(Lang.Editor_Region_Enter_Player_name).getLocalized());
+                    EditorManager.startEdit(viewer.getPlayer(), wrapper -> {
+                        String playerName = wrapper.getTextRaw();
+                        Player player = PlayerUtil.getPlayer(playerName);
+                        if (player == null) {
+                            EditorManager.error(viewer.getPlayer(), plugin().getMessage(Lang.Editor_Region_Members_Player_NF).getLocalized());
+                            return false;
+                        }
+                        if (region.isAllowed(player)) {
+                            EditorManager.error(viewer.getPlayer(), plugin().getMessage(Lang.Editor_Region_Members_Player_Already).getLocalized());
+                            return false;
+                        }
+                        region.addMember(player);
+                        region.save();
+                        this.openAsync(viewer, 1);
+                        return true;
+                    });
+                    plugin.runTask(task -> viewer.getPlayer().closeInventory());
                 });
-                plugin.runTask(task -> viewer.getPlayer().closeInventory());
-            });
 
         this.load();
     }
@@ -89,26 +93,33 @@ public class RegionMembersMenu extends ConfigMenu<ProtectionPlugin> implements A
     public @NotNull ItemStack getObjectStack(@NotNull Player player, @NotNull RegionMember member) {
         ItemStack item = ItemUtil.getSkinHead(member.getUuid().toString());
         ItemReplacer.create(item)
-                    .setDisplayName(this.previewName)
-                    .setLore(this.previewLore)
-                    .replace(member.replacePlaceholders())
-                    .replace(this.region.replacePlaceholders())
-                    .replace(Colorizer::apply)
-                    .writeMeta();
+                .setDisplayName(this.previewName)
+                .setLore(this.previewLore)
+                .replace(member.replacePlaceholders())
+                .replace(this.region.replacePlaceholders())
+                .replace(Colorizer::apply)
+                .writeMeta();
         return item;
     }
 
     @Override
     public @NotNull ItemClick getObjectClick(@NotNull RegionMember member) {
         return (viewer, event) -> {
-            this.region.removeMember(member);
-            this.region.save();
+            if (event.isLeftClick()) {
+                member.setRole(Config.getNextMemberRole(member.getRole()));
+                openAsync(viewer, 1);
+                return;
+            }
+            if (event.isShiftClick() && event.isRightClick()) {
+                this.region.removeMember(member);
+                this.region.save();
 
-            plugin.getMessage(Lang.MENU_MEMBERS_KICK_SUCCESS)
-                  .replace(Placeholders.MEMBER_NAME, member.getName())
-                  .send(viewer.getPlayer());
+                plugin.getMessage(Lang.MENU_MEMBERS_KICK_SUCCESS)
+                        .replace(Placeholders.MEMBER_NAME, member.getName())
+                        .send(viewer.getPlayer());
 
-            this.openAsync(viewer, 1);
+                this.openAsync(viewer, 1);
+            }
         };
     }
 

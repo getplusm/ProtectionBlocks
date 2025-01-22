@@ -1,34 +1,46 @@
-package t.me.p1azmer.plugin.protectionblocks.region.impl;
+package t.me.p1azmer.plugin.protectionblocks.region.members;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import t.me.p1azmer.engine.api.config.JYML;
+import t.me.p1azmer.engine.api.config.Writeable;
 import t.me.p1azmer.engine.utils.PlayerUtil;
 import t.me.p1azmer.engine.utils.TimeUtil;
 import t.me.p1azmer.engine.utils.placeholder.Placeholder;
 import t.me.p1azmer.engine.utils.placeholder.PlaceholderMap;
 import t.me.p1azmer.plugin.protectionblocks.Placeholders;
+import t.me.p1azmer.plugin.protectionblocks.config.Config;
 
 import java.util.UUID;
 
 @Getter
-public class RegionMember implements Placeholder {
-    private final UUID uuid;
-    private final String name;
-    private final long joinTime;
-
-    private final PlaceholderMap placeholders;
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class RegionMember implements Placeholder, Writeable {
+    UUID uuid;
+    String name;
+    long joinTime;
+    PlaceholderMap placeholders;
+    @NonFinal
+    MemberRole role;
 
     public RegionMember(@NotNull UUID uuid, @NotNull String name, long joinTime) {
         this.uuid = uuid;
         this.name = name;
         this.joinTime = joinTime;
+        this.role = Config.getDefaultMemberRole();
 
         this.placeholders = new PlaceholderMap()
-          .add(Placeholders.MEMBER_JOIN_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getJoinTime()))
-          .add(Placeholders.MEMBER_NAME, this::getName);
+                .add(Placeholders.MEMBER_JOIN_TIME, () -> TimeUtil.formatTime(System.currentTimeMillis() - this.getJoinTime()))
+                .add(Placeholders.MEMBER_NAME, this::getName)
+                .add(Placeholders.MEMBER_ROLE_PRIORITY, () -> Integer.toString(getRole().getPriority()))
+                .add(Placeholders.MEMBER_ROLE_NAME, () -> getRole().getDisplayName());
     }
 
     public static RegionMember of(@NotNull Player player) {

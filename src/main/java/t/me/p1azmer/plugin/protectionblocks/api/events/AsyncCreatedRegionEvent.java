@@ -16,9 +16,8 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class AsyncCreatedRegionEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private boolean cancelled = false;
-
     private final Block block;
+    private boolean cancelled = false;
     private boolean notifyIfCancelled = true;
 
     public AsyncCreatedRegionEvent(@NotNull Block block) {
@@ -26,12 +25,12 @@ public class AsyncCreatedRegionEvent extends Event implements Cancellable {
         this.block = block;
     }
 
-    @Override
-    public @NotNull HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public @NotNull HandlerList getHandlers() {
         return handlers;
     }
 }

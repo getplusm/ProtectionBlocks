@@ -33,15 +33,15 @@ public class RGListEditor extends EditorMenu<ProtectionPlugin, RegionManager> im
         this.addPreviousPage(36);
 
         this.addCreation(EditorLocales.REGION_BLOCK_CREATE, 41)
-            .setClick((viewer, event) -> {
-                this.handleInput(viewer, Lang.Editor_Region_Block_Enter_Create, wrapper -> {
-                    if (!this.object.createRegionBlock(StringUtil.lowerCaseUnderscore(wrapper.getTextRaw()))) {
-                        EditorManager.error(viewer.getPlayer(), plugin.getMessage(Lang.Editor_Region_Block_Error_Exist).getLocalized());
-                        return false;
-                    }
-                    return true;
+                .setClick((viewer, event) -> {
+                    this.handleInput(viewer, Lang.Editor_Region_Block_Enter_Create, wrapper -> {
+                        if (!this.object.createRegionBlock(StringUtil.lowerCaseUnderscore(wrapper.getTextRaw()))) {
+                            EditorManager.error(viewer.getPlayer(), plugin.getMessage(Lang.Editor_Region_Block_Error_Exist).getLocalized());
+                            return false;
+                        }
+                        return true;
+                    });
                 });
-            });
     }
 
     @Override
@@ -59,9 +59,9 @@ public class RGListEditor extends EditorMenu<ProtectionPlugin, RegionManager> im
     @NotNull
     public List<RegionBlock> getObjects(@NotNull Player player) {
         return this.object.getRegionBlocks()
-                          .stream()
-                          .sorted(Comparator.comparing(RegionBlock::getId))
-                          .toList();
+                .stream()
+                .sorted(Comparator.comparing(RegionBlock::getId))
+                .toList();
     }
 
     @Override

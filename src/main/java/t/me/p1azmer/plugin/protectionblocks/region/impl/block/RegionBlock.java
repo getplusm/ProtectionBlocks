@@ -36,6 +36,8 @@ import static t.me.p1azmer.engine.utils.Constants.DEFAULT;
 @Getter
 @Setter
 public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implements Placeholder {
+    private final PlaceholderMap placeholderMap;
+    private final RegionManager manager;
     private ItemStack item;
     private String name;
     private int strength;
@@ -49,17 +51,11 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
     private boolean hologramEnabled;
     private boolean hologramInRegion;
     private String hologramTemplate;
-
     private int depositPrice;
     private String currencyId;
-
     private BlockRecipe blockRecipe;
-
-    private final PlaceholderMap placeholderMap;
-
     private RGBlockMainEditor editor;
     private RecipePreviewMainMenu previewMenu;
-    private final RegionManager manager;
 
     public RegionBlock(@NotNull RegionManager manager, @NotNull JYML cfg) {
         super(manager.plugin(), cfg);
@@ -72,33 +68,33 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         this.setStrength(1);
         this.setRegionSize(5);
         this.setBlockRecipe(new BlockRecipe(this, Map.of(
-          10, new ItemStack(Material.AIR),
-          11, new ItemStack(Material.AIR),
-          12, new ItemStack(Material.AIR),
-          19, new ItemStack(Material.AIR),
-          20, new ItemStack(Material.AIR),
-          21, new ItemStack(Material.AIR),
-          28, new ItemStack(Material.AIR),
-          29, new ItemStack(Material.AIR),
-          30, new ItemStack(Material.AIR))
-          , false));
+                10, new ItemStack(Material.AIR),
+                11, new ItemStack(Material.AIR),
+                12, new ItemStack(Material.AIR),
+                19, new ItemStack(Material.AIR),
+                20, new ItemStack(Material.AIR),
+                21, new ItemStack(Material.AIR),
+                28, new ItemStack(Material.AIR),
+                29, new ItemStack(Material.AIR),
+                30, new ItemStack(Material.AIR))
+                , false));
 
         this.placeholderMap = new PlaceholderMap()
-          .add(Placeholders.REGION_BLOCK_ID, this::getId)
-          .add(Placeholders.REGION_BLOCK_NAME, () -> Colorizer.apply(this.getName()))
-          .add(Placeholders.REGION_BLOCK_SIZE, () -> String.valueOf(this.getRegionSize()))
-          .add(Placeholders.REGION_BLOCK_STRENGTH, () -> String.valueOf(this.getStrength()))
-          .add(Placeholders.REGION_BLOCK_DEPOSIT_PRICE, () -> String.valueOf(this.getDepositPrice()))
-          .add(Placeholders.REGION_BLOCK_DEPOSIT_CURRENCY, this::getCurrencyId)
-          .add(Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED, () -> LangManager.getBoolean(this.isLifeTimeEnabled()))
-          .add(Placeholders.REGION_BLOCK_PLACE_LIMIT_ENABLED, () -> LangManager.getBoolean(this.isPlaceLimitEnabled()))
-          .add(Placeholders.REGION_BLOCK_GROUP_SIZE_ENABLED, () -> LangManager.getBoolean(this.isGroupSizeEnabled()))
-          .add(Placeholders.REGION_BLOCK_HOLOGRAM_ENABLED, () -> LangManager.getBoolean(this.isHologramEnabled()))
-          .add(Placeholders.REGION_BLOCK_HOLOGRAM_IN_REGION, () -> LangManager.getBoolean(this.isHologramInRegion()))
-          .add(Placeholders.REGION_IS_INFINITY_Y_BLOCKS, () -> LangManager.getBoolean(this.isInfinityYBlocks()))
-          .add(Placeholders.REGION_BLOCK_HOLOGRAM_TEMPLATE, this::getHologramTemplate)
-          .add(Placeholders.REGION_BLOCK_RECIPE_ENABLED, () -> LangManager.getBoolean(this.getBlockRecipe().isEnabled()))
-          .add(Placeholders.REGION_BLOCK_WORLDS, () -> Colorizer.apply(Colors2.LIGHT_PURPLE + String.join(", ", this.getWorlds())))
+                .add(Placeholders.REGION_BLOCK_ID, this::getId)
+                .add(Placeholders.REGION_BLOCK_NAME, () -> Colorizer.apply(this.getName()))
+                .add(Placeholders.REGION_BLOCK_SIZE, () -> String.valueOf(this.getRegionSize()))
+                .add(Placeholders.REGION_BLOCK_STRENGTH, () -> String.valueOf(this.getStrength()))
+                .add(Placeholders.REGION_BLOCK_DEPOSIT_PRICE, () -> String.valueOf(this.getDepositPrice()))
+                .add(Placeholders.REGION_BLOCK_DEPOSIT_CURRENCY, this::getCurrencyId)
+                .add(Placeholders.REGION_BLOCK_LIFE_TIME_ENABLED, () -> LangManager.getBoolean(this.isLifeTimeEnabled()))
+                .add(Placeholders.REGION_BLOCK_PLACE_LIMIT_ENABLED, () -> LangManager.getBoolean(this.isPlaceLimitEnabled()))
+                .add(Placeholders.REGION_BLOCK_GROUP_SIZE_ENABLED, () -> LangManager.getBoolean(this.isGroupSizeEnabled()))
+                .add(Placeholders.REGION_BLOCK_HOLOGRAM_ENABLED, () -> LangManager.getBoolean(this.isHologramEnabled()))
+                .add(Placeholders.REGION_BLOCK_HOLOGRAM_IN_REGION, () -> LangManager.getBoolean(this.isHologramInRegion()))
+                .add(Placeholders.REGION_IS_INFINITY_Y_BLOCKS, () -> LangManager.getBoolean(this.isInfinityYBlocks()))
+                .add(Placeholders.REGION_BLOCK_HOLOGRAM_TEMPLATE, this::getHologramTemplate)
+                .add(Placeholders.REGION_BLOCK_RECIPE_ENABLED, () -> LangManager.getBoolean(this.getBlockRecipe().isEnabled()))
+                .add(Placeholders.REGION_BLOCK_WORLDS, () -> Colorizer.apply(Colors2.LIGHT_PURPLE + String.join(", ", this.getWorlds())))
         ;
     }
 
@@ -142,16 +138,16 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         this.setWorlds(cfg.getStringList("Worlds"));
         if (!cfg.isSet("Region.Recipe")) {
             this.setBlockRecipe(new BlockRecipe(this, Map.of(
-              10, new ItemStack(Material.AIR),
-              11, new ItemStack(Material.AIR),
-              12, new ItemStack(Material.AIR),
-              19, new ItemStack(Material.AIR),
-              20, new ItemStack(Material.AIR),
-              21, new ItemStack(Material.AIR),
-              28, new ItemStack(Material.AIR),
-              29, new ItemStack(Material.AIR),
-              30, new ItemStack(Material.AIR))
-              , false));
+                    10, new ItemStack(Material.AIR),
+                    11, new ItemStack(Material.AIR),
+                    12, new ItemStack(Material.AIR),
+                    19, new ItemStack(Material.AIR),
+                    20, new ItemStack(Material.AIR),
+                    21, new ItemStack(Material.AIR),
+                    28, new ItemStack(Material.AIR),
+                    29, new ItemStack(Material.AIR),
+                    30, new ItemStack(Material.AIR))
+                    , false));
             this.save();
         } else {
             this.setBlockRecipe(BlockRecipe.read(cfg, "Region", this));
@@ -260,7 +256,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         if (lifeTimeEnabled) {
             if (!this.getConfig().contains("Life_Time.Parameter")) {
                 new RankMap<>(RankMap.Mode.RANK, "", 604800, Map.of(DEFAULT, 604800))
-                  .write(this.getConfig(), "Life_Time.Parameter");
+                        .write(this.getConfig(), "Life_Time.Parameter");
             }
             this.lifeTime = RankMap.readInt(cfg, "Life_Time.Parameter", 604800);
         }
@@ -271,7 +267,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         if (placeLimitEnabled) {
             if (!this.getConfig().contains("Limits.Place.Groups")) {
                 new RankMap<>(RankMap.Mode.RANK, "", -1, Map.of(DEFAULT, 3, "admin", -1))
-                  .write(this.getConfig(), "Limits.Place.Groups");
+                        .write(this.getConfig(), "Limits.Place.Groups");
             }
             this.placeLimit = RankMap.readInt(cfg, "Limits.Place.Groups", -1);
         }
@@ -282,7 +278,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         if (groupSizeEnabled) {
             if (!this.getConfig().contains("Region.Size.Group.List")) {
                 new RankMap<>(RankMap.Mode.RANK, "", 3, Map.of(DEFAULT, 3))
-                  .write(this.getConfig(), "Region.Size.Group.List");
+                        .write(this.getConfig(), "Region.Size.Group.List");
             }
             this.groupSize = RankMap.readInt(cfg, "Region.Size.Group.List", 3);
         }
@@ -292,7 +288,7 @@ public class RegionBlock extends AbstractConfigHolder<ProtectionPlugin> implemen
         if (this.getBreakers().isEmpty()) return false;
 
         return this.getBreakers()
-                   .stream()
-                   .anyMatch(regionBreaker -> regionBreaker.tryBreakRegion(damageType, blockOrItem));
+                .stream()
+                .anyMatch(regionBreaker -> regionBreaker.tryBreakRegion(damageType, blockOrItem));
     }
 }

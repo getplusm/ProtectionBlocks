@@ -54,21 +54,21 @@ public class RecipePreviewListMenu extends ConfigMenu<ProtectionPlugin> implemen
     @Override
     public @NotNull List<RegionBlock> getObjects(@NotNull Player player) {
         return this.manager.getRegionBlocks()
-                           .stream()
-                           .filter(f -> f.getBlockRecipe().isEnabled())
-                           .collect(Collectors.toList());
+                .stream()
+                .filter(f -> f.getBlockRecipe().isEnabled())
+                .collect(Collectors.toList());
     }
 
     @Override
     public @NotNull ItemStack getObjectStack(@NotNull Player player, @NotNull RegionBlock regionBlock) {
         ItemStack item = regionBlock.getItem();
         ItemReplacer.create(item)
-                    .setLore(this.previewLore)
-                    .setDisplayName(this.previewName)
-                    .replaceLoreExact("%item_lore%", ItemUtil.getLore(item))
-                    .replace(regionBlock.replacePlaceholders())
-                    .replace(Colorizer::apply)
-                    .writeMeta();
+                .setLore(this.previewLore)
+                .setDisplayName(this.previewName)
+                .replaceLoreExact("%item_lore%", ItemUtil.getLore(item))
+                .replace(regionBlock.replacePlaceholders())
+                .replace(Colorizer::apply)
+                .writeMeta();
         return item;
     }
 

@@ -44,6 +44,14 @@ public class DataHandler extends AbstractUserDataHandler<ProtectionPlugin, Regio
         };
     }
 
+    @NotNull
+    public static synchronized DataHandler getInstance(@NotNull ProtectionPlugin plugin) {
+        if (instance == null) {
+            instance = new DataHandler(plugin);
+        }
+        return instance;
+    }
+
     private void mapSwapper(@NotNull Map<String, String> map) { // bad but easy method
         Map<String, String> updatedMap = new HashMap<>();
 
@@ -60,14 +68,6 @@ public class DataHandler extends AbstractUserDataHandler<ProtectionPlugin, Regio
 
         map.clear();
         map.putAll(updatedMap);
-    }
-
-    @NotNull
-    public static synchronized DataHandler getInstance(@NotNull ProtectionPlugin plugin) {
-        if (instance == null) {
-            instance = new DataHandler(plugin);
-        }
-        return instance;
     }
 
     @Override

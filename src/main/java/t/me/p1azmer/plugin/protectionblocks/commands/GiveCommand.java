@@ -74,9 +74,9 @@ public class GiveCommand extends AbstractCommand<ProtectionPlugin> {
         PlayerUtil.addItem(player, regionBlock.getItem(), amount);
 
         plugin.getMessage(Lang.COMMAND_GIVE_DONE)
-              .replace(regionBlock.replacePlaceholders())
-              .replace(Placeholders.forPlayer(player))
-              .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(amount))
-              .send(sender);
+                .replace(regionBlock.replacePlaceholders())
+                .replace(Placeholders.forPlayer(player))
+                .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(amount))
+                .send(sender);
     }
 }

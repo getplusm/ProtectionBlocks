@@ -22,14 +22,14 @@ public class Cuboid {
         World world = loc1.getWorld();
         int minX = Math.min(loc1.getBlockX(), loc2.getBlockX());
         int minY = infinityY ?
-          world.getMinHeight() :
-          Math.min(loc1.getBlockY(), loc2.getBlockY());
+                world.getMinHeight() :
+                Math.min(loc1.getBlockY(), loc2.getBlockY());
         int minZ = Math.min(loc1.getBlockZ(), loc2.getBlockZ());
 
         int maxX = Math.max(loc1.getBlockX(), loc2.getBlockX());
         int maxY = infinityY ?
-          world.getMaxHeight() :
-          Math.max(loc1.getBlockY(), loc2.getBlockY());
+                world.getMaxHeight() :
+                Math.max(loc1.getBlockY(), loc2.getBlockY());
         int maxZ = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
 
         this.min = new Location(loc1.getWorld(), minX, minY, minZ);
@@ -48,8 +48,8 @@ public class Cuboid {
         int minY = infinityY ? world.getMinHeight() : this.min.getBlockY();
         int maxY = infinityY ? world.getMaxHeight() : this.max.getBlockY();
         return x >= min.getBlockX() && x <= max.getBlockX() &&
-          y >= minY && y <= maxY &&
-          z >= min.getBlockZ() && z <= max.getBlockZ();
+                y >= minY && y <= maxY &&
+                z >= min.getBlockZ() && z <= max.getBlockZ();
     }
 
     @NotNull

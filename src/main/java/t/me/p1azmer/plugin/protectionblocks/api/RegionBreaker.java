@@ -14,18 +14,17 @@ import t.me.p1azmer.plugin.protectionblocks.region.impl.block.DamageType;
 
 @Data
 public class RegionBreaker implements Placeholder {
+    private final PlaceholderMap placeholders;
     private ItemStack item;
     private DamageType damageType;
-
-    private final PlaceholderMap placeholders;
 
     public RegionBreaker(@NotNull ItemStack item, @NotNull DamageType damageType) {
         this.item = item;
         this.damageType = damageType;
 
         this.placeholders = new PlaceholderMap()
-          .add(Placeholders.REGION_BLOCK_BREAKER_DMG_TYPE, () -> ProtectionAPI.PLUGIN.getLangManager()
-                                                                                     .getEnum(this.getDamageType()));
+                .add(Placeholders.REGION_BLOCK_BREAKER_DMG_TYPE, () -> ProtectionAPI.PLUGIN.getLangManager()
+                        .getEnum(this.getDamageType()));
     }
 
     @NotNull

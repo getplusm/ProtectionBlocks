@@ -11,8 +11,10 @@ Preview:
   Lore:
     - '#ee9aff&lJoined:'
     - '#ddecee%member_join_time%'
+    - '#ddecee%member_role_name% #aaa8a8(#e8f2f2%member_role_priority%#aaa8a8)'
     - '#9af7ff&lActions:'
-    - '#9af7ff▪ #ddeceeAny-Click: #9af7ffKick'
+    - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange Role'
+    - '#9af7ff▪ #ddeceeShift-Right: #9af7ffKick'
 
 Content:
   add_member:
@@ -20,7 +22,7 @@ Content:
       Material: PLAYER_HEAD
       Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWZmMzE0MzFkNjQ1ODdmZjZlZjk4YzA2NzU4MTA2ODFmOGMxM2JmOTZmNTFkOWNiMDdlZDc4NTJiMmZmZDEifX19
       Name: '#ead931&lNew Member'
-      Lore: []
+      Lore: [ ]
     Slots: 53
     Type: ADD_MEMBER
   return:
@@ -28,7 +30,7 @@ Content:
       Material: PLAYER_HEAD
       Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmU5YWU3YTRiZTY1ZmNiYWVlNjUxODEzODlhMmY3ZDQ3ZTJlMzI2ZGI1OWVhM2ViNzg5YTkyYzg1ZWE0NiJ9fX0=
       Name: '#e6e4dd(↓) &fReturn'
-      Lore: []
+      Lore: [ ]
     Slots: 49
     Type: RETURN
 
